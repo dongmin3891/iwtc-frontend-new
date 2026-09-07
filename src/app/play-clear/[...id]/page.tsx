@@ -146,7 +146,7 @@ const Page = ({ params }: { params: { id: string[] } }) => {
                                 </div>
                             </section>
                             <div>
-                                <ReplyRegisterForm worldcupId={worldCupId} contentsId={Number(id[1])} />
+                                <ReplyRegisterForm worldcupId={worldCupId} contentsId={Number(id[3])} />
                             </div>
                         </div>
                     </div>

@@ -1,14 +1,19 @@
 export const createWorldCupClearRequest = (routeParams: string[]) => {
-    const [worldCupId, firstWinnerContentsId, secondWinnerContentsId, thirdWinnerContentsId, fourthWinnerContentsId] =
-        routeParams.map((value) => (value === '0' ? undefined : value));
+    const [worldCupId, playId, roundValue, ...rankedContentsIds] = routeParams;
+    const placements = rankedContentsIds
+        .slice(0, 4)
+        .map((contentsId, index) => ({
+            contentsId: Number(contentsId),
+            rank: index + 1,
+        }))
+        .filter((placement) => placement.contentsId !== 0);
 
     return {
         worldCupId,
-        winnerParams: {
-            firstWinnerContentsId,
-            secondWinnerContentsId,
-            thirdWinnerContentsId,
-            fourthWinnerContentsId,
+        resultRequest: {
+            playId,
+            round: Number(roundValue),
+            placements,
         },
     };
 };

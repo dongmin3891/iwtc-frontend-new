@@ -106,7 +106,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                 winnerContentId,
                 loserContentId,
             });
-            router.push(createGameClearPath(worldCupId, updatedRankContents));
+            router.push(createGameClearPath(worldCupId, crypto.randomUUID(), initialRound, updatedRankContents));
             return;
         }
         setTimeout(() => {

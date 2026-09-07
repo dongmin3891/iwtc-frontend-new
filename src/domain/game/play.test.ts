@@ -114,15 +114,20 @@ describe('game rank contents', () => {
         });
     });
 
-    it('creates the existing clear-page route order', () => {
+    it('creates a clear-page route with its play id and initial round', () => {
         assert.equal(
-            createGameClearPath(5, {
-                firstWinnerContentsId: 10,
-                secondWinnerContentsId: 30,
-                thirdWinnerContentsId: 40,
-                fourthWinnerContentsId: 20,
-            }),
-            '/play-clear/5/10/30/40/20'
+            createGameClearPath(
+                5,
+                '550e8400-e29b-41d4-a716-446655440000',
+                4,
+                {
+                    firstWinnerContentsId: 10,
+                    secondWinnerContentsId: 30,
+                    thirdWinnerContentsId: 40,
+                    fourthWinnerContentsId: 20,
+                }
+            ),
+            '/play-clear/5/550e8400-e29b-41d4-a716-446655440000/4/10/30/40/20'
         );
     });
 });

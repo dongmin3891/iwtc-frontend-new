@@ -62,10 +62,10 @@ export const worldCupGamePlay = async ({
 };
 
 export const worldCupGameClear = async (routeParams: string[]) => {
-    const { worldCupId, winnerParams } = createWorldCupClearRequest(routeParams);
-    const response = await ajaxPost<WorldCupClearResponse, typeof winnerParams>(
+    const { worldCupId, resultRequest } = createWorldCupClearRequest(routeParams);
+    const response = await ajaxPost<WorldCupClearResponse, typeof resultRequest>(
         `/world-cups/${worldCupId}/clear`,
-        winnerParams
+        resultRequest
     );
     return response.data;
 };

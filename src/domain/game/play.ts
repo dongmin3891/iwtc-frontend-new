@@ -97,8 +97,13 @@ export const updateGameRankContents = (
     return rankContents;
 };
 
-export const createGameClearPath = (worldCupId: number, rankContents: GameRankContents): string =>
-    `/play-clear/${worldCupId}/${rankContents.firstWinnerContentsId}/${rankContents.secondWinnerContentsId}/${rankContents.thirdWinnerContentsId}/${rankContents.fourthWinnerContentsId}`;
+export const createGameClearPath = (
+    worldCupId: number,
+    playId: string,
+    initialRound: number,
+    rankContents: GameRankContents
+): string =>
+    `/play-clear/${worldCupId}/${playId}/${initialRound}/${rankContents.firstWinnerContentsId}/${rankContents.secondWinnerContentsId}/${rankContents.thirdWinnerContentsId}/${rankContents.fourthWinnerContentsId}`;
 
 export const createWorldCupGameRequest = (
     worldCupId: number,
