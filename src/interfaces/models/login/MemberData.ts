@@ -18,11 +18,3 @@ export interface userInfo {
 export interface UserSummaryResponse {
     data: userInfo;
 }
-
-export interface RefreshTokenResponse {
-    code: number;
-    data: {
-        newAccessToken: string;
-        refreshToken: string;
-    };
-}

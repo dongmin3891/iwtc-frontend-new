@@ -39,5 +39,6 @@ export const getUserInfo = () => {
 };
 
 export const localStorageClear = () => {
-    window.localStorage.clear();
+    window.localStorage.removeItem('authtoken');
+    window.localStorage.removeItem('userInfo');
 };

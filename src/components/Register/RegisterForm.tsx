@@ -8,6 +8,7 @@ import { userSignUp } from '@/services/MemberService';
 import { useRouter } from 'next/navigation';
 import { PopupContext } from '@/providers/PopupProvider';
 import AlertPopup from '../popup/AlertPopup';
+import { isAxiosError } from 'axios';
 
 type FormTypes = {
     username: string;
@@ -25,7 +26,6 @@ interface inputTypes {
 const RegisterForm = () => {
     const {
         register,
-        watch,
         setValue,
         handleSubmit,
         formState: { errors },
@@ -71,6 +71,13 @@ const RegisterForm = () => {
             router.push('/sign-in');
             showPopup(<AlertPopup message={'회원가입에 성공하셨습니다.'} hidePopup={hidePopup} />);
         },
+        onError: (error: unknown) => {
+            if (isAxiosError<{ message: string }>(error) && error.response?.data) {
+                showPopup(<AlertPopup message={error.response.data.message} hidePopup={hidePopup} />);
+                return;
+            }
+            showPopup(<AlertPopup message="회원가입 중 오류가 발생했습니다." hidePopup={hidePopup} />);
+        },
     });
 
     /**
@@ -80,24 +87,22 @@ const RegisterForm = () => {
         setValue(field, e.target.value, { shouldValidate: true });
     };
 
-    const handleRegister = () => {
-        const { username, password, nickname } = watch();
+    const handleRegister = ({ username, password, nickname }: FormTypes) => {
         const userInfo = {
-            serviceId: username,
+            serviceId: username.trim().toLowerCase(),
             password,
-            nickname,
+            nickname: nickname.trim(),
         };
         mutate(userInfo);
     };
 
     return (
         <div className="p-4">
-            <form className="max-w-sm mx-auto">
+            <form className="max-w-sm mx-auto" onSubmit={handleSubmit(handleRegister)}>
                 <div className="grid gap-y-2 mb-6">
-                    {inputList.map((items, index) => (
-                        <>
+                    {inputList.map((items) => (
+                        <React.Fragment key={items.id}>
                             <input
-                                key={index}
                                 className={inputCss}
                                 type={items.type}
                                 placeholder={items.placeholder}
@@ -105,13 +110,12 @@ const RegisterForm = () => {
                                 onChange={handleChange(items.inputText)}
                             />
                             {errors[items.inputText] && <ValidateMessage result={errors[items.inputText]} />}
-                        </>
+                        </React.Fragment>
                     ))}
                 </div>
                 <button
                     type="submit"
                     className="inline-block px-7 py-3 bg-yellow-400 text-white leading-snug rounded shadow-md hover:bg-yellow-400 hover:shadow-lg focus:bg-yellow-400 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-yellow-400 w-full"
-                    onClick={handleSubmit(handleRegister)}
                 >
                     회원가입
                 </button>

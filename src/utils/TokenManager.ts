@@ -3,18 +3,18 @@ import { Cookies } from 'react-cookie';
 
 const cookies = new Cookies();
 
-export const setToken = (key: 'ACCESS_TOKEN' | 'REFRESH_TOKEN', token: string) => {
-    cookies.set(key, token, { path: '/' });
+export const setToken = (token: string) => {
+    cookies.set('ACCESS_TOKEN', token, {
+        path: '/',
+        sameSite: 'lax',
+        secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
+    });
 };
 
-export const removeToken = (key: 'ACCESS_TOKEN' | 'REFRESH_TOKEN') => {
-    cookies.remove(key, { path: '/' });
+export const removeToken = () => {
+    cookies.remove('ACCESS_TOKEN', { path: '/' });
 };
 
 export const getAccessToken = () => {
     return cookies.get('ACCESS_TOKEN');
-};
-
-export const getRefreshToken = () => {
-    return cookies.get('REFRESH_TOKEN');
 };

@@ -6,6 +6,7 @@ import { localStorageClear } from '@/stores/LocalStore';
 import { useAuth } from '@/providers/AuthProvider';
 import { PopupContext } from '@/providers/PopupProvider';
 import AlertPopup from '../popup/AlertPopup';
+import { removeToken } from '@/utils/TokenManager';
 
 const SignInUpButton = () => {
     const router = useRouter();
@@ -14,8 +15,10 @@ const SignInUpButton = () => {
 
     const onClickHandler = async (isLogin: boolean) => {
         if (isLogin) {
-            const response = await userSignOut();
-            if (response) {
+            try {
+                await userSignOut();
+            } finally {
+                removeToken();
                 localStorageClear();
                 logout();
                 showPopup(<AlertPopup message="로그아웃 하셨습니다." hidePopup={hidePopup} />);

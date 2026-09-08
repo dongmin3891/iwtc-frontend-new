@@ -55,6 +55,14 @@ NEXT_PUBLIC_API_MEMBER_URL=https://member.example.com/
 - 변수 이름에 `NEXT_PUBLIC_`이 있으므로 브라우저 번들에 포함됩니다. 비밀 키나 인증 정보를 저장하지 마세요.
 - 일반 월드컵 요청은 `NEXT_PUBLIC_API_BASE_URL`, URL에 `member`가 포함된 회원 요청은 `NEXT_PUBLIC_API_MEMBER_URL`을 사용합니다.
 
+### 인증 동작
+
+- 로그인 성공 시 access token은 기존 API 호환을 위해 브라우저의 `ACCESS_TOKEN` 쿠키에 저장하고 요청의 `access-token` 헤더로 전송합니다.
+- refresh token은 백엔드가 설정하는 HttpOnly 쿠키이므로 프론트 코드와 JavaScript에서 읽거나 저장하지 않습니다.
+- access token이 만료되면 refresh 요청을 한 번만 실행하고 실패한 원래 요청을 재시도합니다. 여러 요청이 동시에 만료되어도 refresh 요청은 중복 실행하지 않습니다.
+- 로그인과 회원가입의 401 응답은 자동 갱신 대상으로 처리하지 않습니다.
+- 로그아웃은 `POST /api/members/sign-out`을 호출한 뒤 access token과 로컬 회원 정보를 정리합니다.
+
 ### 개발 서버 실행
 
 ```bash

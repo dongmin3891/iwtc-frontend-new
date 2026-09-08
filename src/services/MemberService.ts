@@ -1,11 +1,5 @@
-import {
-    RefreshTokenResponse,
-    SignUpInfo,
-    SignInInfo,
-    UserSummaryResponse,
-} from '@/interfaces/models/login/MemberData';
+import { SignUpInfo, SignInInfo, UserSummaryResponse } from '@/interfaces/models/login/MemberData';
 import { ajaxGet, ajaxPost } from './BaseService';
-import { getAccessToken, getRefreshToken } from '@/utils/TokenManager';
 
 export const userSignUp = async (param: SignUpInfo) => {
     const response = await ajaxPost<void, SignUpInfo>('/members/sign-up', param);
@@ -18,13 +12,7 @@ export const userSignIn = async (param: SignInInfo) => {
 };
 
 export const userSignOut = async () => {
-    const headers = {
-        'Content-Type': 'application/json',
-        'access-token': `${getAccessToken()}`,
-    };
-
-    const response = await ajaxGet<void>(`/members/sign-out`, {
-        headers: headers,
+    const response = await ajaxPost<void>(`/members/sign-out`, undefined, {
         timeout: 5000,
     });
     return response;
@@ -36,23 +24,6 @@ export const userMeSummary = async (token: string) => {
         'access-token': `${token}`,
     };
     const response = await ajaxGet<UserSummaryResponse>(`/members/me/summary`, {
-        headers: headers,
-        timeout: 5000,
-    });
-    return response.data;
-};
-
-export const newAccessToken = async () => {
-    const refreshToken = getRefreshToken();
-    const accessToken = getAccessToken();
-    const params = {
-        accessToken,
-        refreshToken,
-    };
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-    const response = await ajaxPost<RefreshTokenResponse, typeof params>(`/new-access-token`, params, {
         headers: headers,
         timeout: 5000,
     });

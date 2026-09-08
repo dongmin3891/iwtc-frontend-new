@@ -1,9 +1,26 @@
 import { BASE_URL, MEMBER_URL } from '@/consts';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
-import { newAccessToken, userSignOut } from './MemberService';
+import axios, {
+    AxiosError,
+    AxiosRequestConfig,
+    AxiosResponse,
+    InternalAxiosRequestConfig,
+    RawAxiosRequestHeaders,
+} from 'axios';
 import { localStorageClear } from '@/stores/LocalStore';
 import { removeToken, setToken } from '@/utils/TokenManager';
 import { hasRetryableUnauthorizedRequest } from './axiosError';
+
+interface ApiEnvelope<T> {
+    code: number;
+    message: string;
+    data: T;
+}
+
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+    _retry?: boolean;
+}
+
+let refreshPromise: Promise<string> | null = null;
 
 const instance = axios.create({
     baseURL: `${BASE_URL}api/`,
@@ -12,7 +29,38 @@ const instance = axios.create({
         Accept: '*/*',
         'Content-Type': 'application/json',
     },
+    withCredentials: true,
 });
+
+const requestNewAccessToken = (): Promise<string> => {
+    if (!refreshPromise) {
+        refreshPromise = axios
+            .post<ApiEnvelope<{ newAccessToken: string }>>(`${MEMBER_URL}api/new-access-token`, undefined, {
+                timeout: 5000,
+                withCredentials: true,
+            })
+            .then((response) => response.data.data.newAccessToken)
+            .finally(() => {
+                refreshPromise = null;
+            });
+    }
+
+    return refreshPromise;
+};
+
+const clearClientAuth = () => {
+    removeToken();
+    if (typeof window !== 'undefined') {
+        localStorageClear();
+    }
+};
+
+const isPublicAuthRequest = (url?: string) =>
+    Boolean(
+        url?.includes('/members/sign-in') ||
+            url?.includes('/members/sign-up') ||
+            url?.includes('/new-access-token')
+    );
 
 instance.interceptors.request.use(
     (config) => {
@@ -45,24 +93,27 @@ instance.interceptors.response.use(
     },
     async (error: AxiosError) => {
         if (hasRetryableUnauthorizedRequest(error)) {
-            const newToken = await newAccessToken();
-            if (newToken.code === 1010101) {
-                const response = await userSignOut();
-                if (response) {
-                    removeToken('ACCESS_TOKEN');
-                    removeToken('REFRESH_TOKEN');
-                    localStorageClear();
-                    window.alert('로그인이 만료되었습니다. 다시 로그인을 해주세요.');
-                    window.location.href = '/sign-in';
-                }
-            } else {
-                const { newAccessToken, refreshToken } = newToken.data;
-                setToken('ACCESS_TOKEN', newAccessToken);
-                setToken('REFRESH_TOKEN', refreshToken);
-                error.config.headers['access-token'] = `${newAccessToken}`;
-                return axios.request(error.config);
+            const config = error.config as RetryableRequestConfig;
+            if (config._retry || isPublicAuthRequest(config.url)) {
+                return Promise.reject(error);
             }
-            return;
+
+            config._retry = true;
+            try {
+                const newAccessToken = await requestNewAccessToken();
+                setToken(newAccessToken);
+                config.headers['access-token'] = newAccessToken;
+                return instance.request(config);
+            } catch {
+                clearClientAuth();
+                if (typeof window !== 'undefined') {
+                    window.alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+                    if (window.location.pathname !== '/sign-in') {
+                        window.location.assign('/sign-in');
+                    }
+                }
+                return Promise.reject(error);
+            }
         }
         return Promise.reject(error);
     }
