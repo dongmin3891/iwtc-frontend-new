@@ -5,7 +5,7 @@ import { replyQueryKeys } from '@/lib/react-query/queryKeys';
 export interface ReplyData {
     body: string;
     commentId: number;
-    commentWriterId: unknown;
+    commentWriterId: number | null;
     createdAt: string;
     writerNickname: string;
 }

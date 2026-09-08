@@ -18,8 +18,11 @@ const ReplyList = ({ replyData }: IProps) => {
                             <span className="text-yellow-400">{writerNickname}</span>
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                            <time dateTime="2022-02-08" title="February 8th, 2022">
-                                {getPassedTimeMessage(moment(createdAt, 'YYYY-MM-DD a hh:mm:ss'))}
+                            <time
+                                dateTime={createdAt}
+                                title={moment(createdAt).format('YYYY-MM-DD HH:mm:ss')}
+                            >
+                                {getPassedTimeMessage(moment(createdAt))}
                             </time>
                         </p>
                     </div>

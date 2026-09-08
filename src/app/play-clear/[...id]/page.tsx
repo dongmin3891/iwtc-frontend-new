@@ -87,7 +87,10 @@ const Page = ({ params }: { params: { id: string[] } }) => {
                                     {rankList.map((items) => {
                                         if (items.rank === 1) {
                                             return items.fileType === 'INTERNET_VIDEO_URL' ? (
-                                                <li className="w-full h-full flex justify-center items-center">
+                                                <li
+                                                    className="w-full h-full flex justify-center items-center"
+                                                    key={items.contentsId}
+                                                >
                                                     <CustomYoutubePlayer
                                                         videoUrl={items.imgUrl}
                                                         time={items.videoStartTime}
@@ -97,7 +100,10 @@ const Page = ({ params }: { params: { id: string[] } }) => {
                                                     />
                                                 </li>
                                             ) : isMP4(items.imgUrl) ? (
-                                                <div className="w-full h-full flex justify-center items-centerl">
+                                                <div
+                                                    className="w-full h-full flex justify-center items-centerl"
+                                                    key={items.contentsId}
+                                                >
                                                     <video
                                                         src={items.imgUrl}
                                                         width={'600rem'}
@@ -108,15 +114,16 @@ const Page = ({ params }: { params: { id: string[] } }) => {
                                                     />
                                                 </div>
                                             ) : (
-                                                <>
-                                                    <li className="w-full h-full flex justify-center items-center ">
-                                                        <img
-                                                            src={items.imgUrl}
-                                                            alt={String(items.contentsId)}
-                                                            className="h-5/6"
-                                                        />
-                                                    </li>
-                                                </>
+                                                <li
+                                                    className="w-full h-full flex justify-center items-center "
+                                                    key={items.contentsId}
+                                                >
+                                                    <img
+                                                        src={items.imgUrl}
+                                                        alt={String(items.contentsId)}
+                                                        className="h-5/6"
+                                                    />
+                                                </li>
                                             );
                                         }
                                     })}

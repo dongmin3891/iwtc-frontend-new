@@ -18,15 +18,21 @@ const ReplyRegisterForm = ({ worldcupId, contentsId }: IProps) => {
     const [text, setText] = useState<string>('');
     const { mutate: replyRegister } = useMutation(worldCupGameReplyRegister, {
         onSuccess: () => {
+            setText('');
             queryClient.invalidateQueries({ queryKey: replyQueryKeys.lists(), refetchType: 'all' });
         },
     });
 
     const onClickRegister = () => {
+        const normalizedText = text.trim();
+        if (!normalizedText) {
+            return;
+        }
+
         const params = {
             worldcupId: worldcupId,
             contentsId: contentsId,
-            body: text,
+            body: normalizedText,
             nickname: isLoggedIn ? getUserInfo().nickname : shortid.generate(),
         };
         replyRegister(params);
@@ -47,6 +53,7 @@ const ReplyRegisterForm = ({ worldcupId, contentsId }: IProps) => {
                     className=" text-white bg-zinc-900 px-0 w-full text-sm text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
                     placeholder="댓글 작성하기..."
                     required
+                    maxLength={30}
                     value={text}
                     onChange={onChangeText}
                 ></textarea>

@@ -8,6 +8,7 @@
 # testing
 /coverage
 /.test-dist
+/.playwright-cli
 
 # next.js
 /.next/
