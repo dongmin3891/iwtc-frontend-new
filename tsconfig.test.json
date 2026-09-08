@@ -37,6 +37,8 @@
         "src/domain/manage/persistedContent.test.ts",
         "src/services/axiosError.ts",
         "src/services/axiosError.test.ts",
+        "src/services/replyPermission.ts",
+        "src/services/replyPermission.test.ts",
         "src/interfaces/models/world-cup/WcListData.ts",
         "src/interfaces/models/world-cup/WcListData.test.ts",
         "src/lib/react-query/queryKeys.ts",

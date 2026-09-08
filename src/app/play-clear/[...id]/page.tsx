@@ -147,8 +147,8 @@ const Page = ({ params }: { params: { id: string[] } }) => {
                                             댓글 ({reply?.data.length ?? 0})
                                         </h2>
                                     </div>
-                                    {reply?.data.map((items, idx) => {
-                                        return <ReplyList key={idx} replyData={items} />;
+                                    {reply?.data.map((items) => {
+                                        return <ReplyList key={items.commentId} replyData={items} />;
                                     })}
                                 </div>
                             </section>

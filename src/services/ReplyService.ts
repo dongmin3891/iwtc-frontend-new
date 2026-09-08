@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ajaxGet, ajaxPost } from './BaseService';
+import { ajaxDelete, ajaxGet, ajaxPost } from './BaseService';
 import { replyQueryKeys } from '@/lib/react-query/queryKeys';
 
 export interface ReplyData {
@@ -19,6 +19,7 @@ interface ReplyRegisterRequest {
     contentsId: number;
     body: string;
     nickname: string;
+    token?: string;
 }
 
 // 댓글 조회
@@ -47,6 +48,7 @@ export const worldCupGameReplyRegister = async ({
     contentsId,
     body,
     nickname,
+    token,
 }: ReplyRegisterRequest) => {
     const params = {
         body,
@@ -54,7 +56,25 @@ export const worldCupGameReplyRegister = async ({
     };
     const response = await ajaxPost<unknown, typeof params>(
         `/world-cups/${worldcupId}/contents/${contentsId}/comments`,
-        params
+        params,
+        token
+            ? {
+                  headers: {
+                      'access-token': token,
+                  },
+              }
+            : undefined
+    );
+    return response.data;
+};
+
+export const worldCupGameReplyDelete = async (commentId: number, token: string) => {
+    const response = await ajaxDelete<void>(
+        `/comments/${commentId}`,
+        {},
+        {
+            'access-token': token,
+        }
     );
     return response.data;
 };

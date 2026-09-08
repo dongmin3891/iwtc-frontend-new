@@ -5,6 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { getUserInfo } from '@/stores/LocalStore';
 import * as shortid from 'shortid';
 import { replyQueryKeys } from '@/lib/react-query/queryKeys';
+import { getAccessToken } from '@/utils/TokenManager';
 
 interface IProps {
     worldcupId: number;
@@ -34,6 +35,7 @@ const ReplyRegisterForm = ({ worldcupId, contentsId }: IProps) => {
             contentsId: contentsId,
             body: normalizedText,
             nickname: isLoggedIn ? getUserInfo().nickname : shortid.generate(),
+            token: isLoggedIn ? getAccessToken() : undefined,
         };
         replyRegister(params);
     };
