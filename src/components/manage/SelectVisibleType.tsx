@@ -25,7 +25,6 @@ const SelectVisibleType = ({ visibleType, handleVisibleType }: IProps) => {
                         name="radioOption"
                         value="option1"
                         checked={visibleType === 'PUBLIC'}
-                        defaultChecked={true}
                         onChange={() => {}}
                     />
                 </label>
