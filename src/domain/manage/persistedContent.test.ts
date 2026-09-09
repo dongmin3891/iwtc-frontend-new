@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import { normalizePersistedManagedContent } from './persistedContent';
 
 const content = {
-    worldCupId: 12,
+    contentsId: 12,
     contentsName: '후보 A',
     videoStartTime: '00000',
     videoPlayDuration: 1,
@@ -69,5 +69,12 @@ describe('normalizePersistedManagedContent', () => {
             detailFileType: 'YOU_TUBE_URL',
             originalName: 'client-name',
         });
+    });
+
+    it('keeps a missing media file optional for a new empty world cup', () => {
+        assert.equal(
+            normalizePersistedManagedContent({ ...content, mediaFileId: null }, undefined, 0).mediaFileId,
+            undefined
+        );
     });
 });

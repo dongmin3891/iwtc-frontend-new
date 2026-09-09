@@ -105,7 +105,7 @@ export const useQueryGetMyWorldCupList = (token: string) => {
 export const getMyWorldCup = async (worldCupId: number) => {
     const authHeaders = createHeader(getAccessToken());
 
-    const response = await ajaxGet<ManagedWorldCupDetailResponse>(`me/game-manage/world-cups/${worldCupId}`, {
+    const response = await ajaxGet<ManagedWorldCupDetailResponse>(`/me/game-manage/world-cups/${worldCupId}`, {
         headers: authHeaders,
         timeout: 5000,
     });

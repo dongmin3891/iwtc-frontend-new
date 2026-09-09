@@ -38,7 +38,7 @@ const ManageForm = ({ params }: { params: { id: string } }) => {
                 try {
                     const newData = await Promise.all(
                         persistedContents.map(async (items, index) => {
-                            const data = await getMediaFile(items.mediaFileId);
+                            const data = items.mediaFileId ? await getMediaFile(items.mediaFileId) : undefined;
                             return normalizePersistedManagedContent(items, data?.data.data, index);
                         })
                     );
