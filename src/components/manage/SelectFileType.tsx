@@ -9,24 +9,20 @@ const SelectFileType = ({ mediaFileType, handleMediaFileType }: IProps) => {
     return (
         <div className="mb-2">
             <div className="mb-3">
-                <strong> ✅ 만들고 싶은 이상형 파일의 종류를 선택해주세요 </strong>
+                <strong>✅ 신규 후보 미디어를 선택해주세요</strong>
+                <p className="mt-1 text-sm text-gray-600">
+                    현재는 YouTube 영상만 등록할 수 있습니다. 이미지 파일 등록은 추후 지원할 예정입니다.
+                </p>
             </div>
             <div className="mb-4">
                 <button
+                    type="button"
                     className={`px-4 py-2 border rounded-md mr-4 ${
                         mediaFileType === 'video' ? 'bg-blue-500 text-white' : 'bg-white'
                     }`}
                     onClick={() => handleMediaFileType('video')}
                 >
                     유튜브 영상
-                </button>
-                <button
-                    className={`px-4 py-2 border rounded-md ${
-                        mediaFileType === 'file' ? 'bg-blue-500 text-white' : 'bg-white'
-                    }`}
-                    onClick={() => handleMediaFileType('file')}
-                >
-                    이미지 파일
                 </button>
             </div>
         </div>
