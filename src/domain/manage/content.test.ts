@@ -88,7 +88,25 @@ describe('validateManagedContentDraft', () => {
         assert.equal(validateManagedContentDraft(createDraft({ fileType: '' })), '파일 타입이 존재하지 않음');
     });
 
-    it('preserves video time and duration validation', () => {
+    it('requires an HTTPS YouTube watch URL', () => {
+        const message = '유튜브 영상 주소는 HTTPS YouTube watch URL이어야 합니다.';
+
+        assert.equal(validateManagedContentDraft(createDraft({ mediaPath: 'http://youtube.com/watch?v=abc' })), message);
+        assert.equal(validateManagedContentDraft(createDraft({ mediaPath: 'https://youtu.be/abc' })), message);
+        assert.equal(validateManagedContentDraft(createDraft({ mediaPath: 'https://youtube.com/embed/abc' })), message);
+        assert.equal(validateManagedContentDraft(createDraft({ mediaPath: 'https://youtube.com/watch' })), message);
+        assert.equal(
+            validateManagedContentDraft(createDraft({ mediaPath: 'https://example.com/watch?v=abc' })),
+            message
+        );
+        assert.equal(
+            validateManagedContentDraft(createDraft({ mediaPath: ' https://www.youtube.com/watch?v=abc_123-xyz ' })),
+            null
+        );
+        assert.equal(validateManagedContentDraft(createDraft({ mediaPath: 'https://m.youtube.com/watch?v=abc' })), null);
+    });
+
+    it('preserves video time and integer duration validation', () => {
         assert.equal(
             validateManagedContentDraft(createDraft({ videoStartTime: '0030' })),
             "'영상 시작 시간'은 '00000'의 형식입니다. \n 예 : 10분 1초 -> 01001, 0분 30초 -> 00030"
@@ -97,19 +115,23 @@ describe('validateManagedContentDraft', () => {
             validateManagedContentDraft(createDraft({ videoPlayDuration: '2' })),
             '반복 시간은 3~5초로 설정해주세요.'
         );
+        assert.equal(
+            validateManagedContentDraft(createDraft({ videoPlayDuration: '3.5' })),
+            '반복 시간은 3~5초로 설정해주세요.'
+        );
         assert.equal(validateManagedContentDraft(createDraft()), null);
     });
 
-    it('requires both file data and its original name', () => {
+    it('blocks static file candidates until the backend supports them', () => {
         assert.equal(
             validateManagedContentDraft(createDraft({ fileType: 'file', mediaPath: '', originalName: '' })),
-            '파일이 존재하지 않습니다.'
+            '현재는 유튜브 영상 후보만 등록할 수 있습니다.'
         );
         assert.equal(
             validateManagedContentDraft(
                 createDraft({ fileType: 'file', mediaPath: 'data:image/png;base64,example', originalName: 'a.png' })
             ),
-            null
+            '현재는 유튜브 영상 후보만 등록할 수 있습니다.'
         );
     });
 });

@@ -52,6 +52,22 @@ export const createUpdateWorldCupContentRequest = (
     detailFileType: content.detailFileType,
 });
 
+const isYoutubeWatchUrl = (value: string): boolean => {
+    try {
+        const url = new URL(value.trim());
+        const videoId = url.searchParams.get('v');
+        return (
+            url.protocol === 'https:' &&
+            ['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname.toLowerCase()) &&
+            url.pathname === '/watch' &&
+            videoId !== null &&
+            /^[A-Za-z0-9_-]{1,64}$/.test(videoId)
+        );
+    } catch {
+        return false;
+    }
+};
+
 export const validateManagedContentDraft = (contents: ManagedContentDraft): string | null => {
     if (contents.contentsName === '') {
         return '컨텐츠 이름이 없습니다.';
@@ -65,19 +81,23 @@ export const validateManagedContentDraft = (contents: ManagedContentDraft): stri
         return '파일 타입이 존재하지 않음';
     }
 
+    if (contents.fileType === 'file') {
+        return '현재는 유튜브 영상 후보만 등록할 수 있습니다.';
+    }
+
     if (contents.fileType === 'video') {
+        if (!isYoutubeWatchUrl(contents.mediaPath)) {
+            return '유튜브 영상 주소는 HTTPS YouTube watch URL이어야 합니다.';
+        }
+
         if (!/^\d{5}$/.test(contents.videoStartTime)) {
             return "'영상 시작 시간'은 '00000'의 형식입니다. \n 예 : 10분 1초 -> 01001, 0분 30초 -> 00030";
         }
 
         const playDuration = Number(contents.videoPlayDuration);
-        if (!(3 <= playDuration && playDuration <= 5)) {
+        if (!Number.isInteger(playDuration) || !(3 <= playDuration && playDuration <= 5)) {
             return '반복 시간은 3~5초로 설정해주세요.';
         }
-    }
-
-    if (contents.fileType === 'file' && (contents.mediaPath === '' || contents.originalName === '')) {
-        return '파일이 존재하지 않습니다.';
     }
 
     return null;
