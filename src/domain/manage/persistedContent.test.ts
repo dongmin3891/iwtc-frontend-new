@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { normalizePersistedManagedContent } from './persistedContent';
+import { applyManagedContentEdit, normalizePersistedManagedContent } from './persistedContent';
 
 const content = {
     contentsId: 12,
@@ -74,6 +74,47 @@ describe('normalizePersistedManagedContent', () => {
     it('keeps a missing media file optional for a new empty world cup', () => {
         assert.equal(
             normalizePersistedManagedContent({ ...content, mediaFileId: null }, undefined, 0).mediaFileId,
+            undefined
+        );
+    });
+});
+
+describe('applyManagedContentEdit', () => {
+    const editableContent = {
+        id: 0,
+        contentsId: 12,
+        contentsName: '후보 A',
+        visibleType: 'PUBLIC',
+        fileType: 'video',
+        mediaData: 'https://www.youtube.com/watch?v=before-video',
+        videoStartTime: '00030',
+        videoPlayDuration: 3,
+        detailFileType: 'YOU_TUBE_URL',
+    };
+
+    it('keeps a visibility-only edit in the persisted candidate update', () => {
+        const result = applyManagedContentEdit(editableContent, {
+            contentsName: editableContent.contentsName,
+            visibleType: 'PRIVATE',
+            mediaData: editableContent.mediaData,
+            videoStartTime: editableContent.videoStartTime,
+            videoPlayDuration: editableContent.videoPlayDuration,
+            detailFileType: editableContent.detailFileType,
+        });
+
+        assert.equal(result?.visibleType, 'PRIVATE');
+    });
+
+    it('returns no edit when all editable fields are unchanged', () => {
+        assert.equal(
+            applyManagedContentEdit(editableContent, {
+                contentsName: editableContent.contentsName,
+                visibleType: editableContent.visibleType,
+                mediaData: editableContent.mediaData,
+                videoStartTime: editableContent.videoStartTime,
+                videoPlayDuration: editableContent.videoPlayDuration,
+                detailFileType: editableContent.detailFileType,
+            }),
             undefined
         );
     });

@@ -1,5 +1,9 @@
 import YoutubePlayer from '@/components/youtubePlayer/YoutubePlayer';
-import { ManagedContent, PersistedManagedContentView } from '@/domain/manage/persistedContent';
+import {
+    applyManagedContentEdit,
+    ManagedContent,
+    PersistedManagedContentView,
+} from '@/domain/manage/persistedContent';
 import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 interface IProps {
@@ -117,20 +121,8 @@ const InternetVideoUrlCard = ({
         setWorldCupContentsList((prev) =>
             prev.map((contents) => {
                 if (contents.id === index) {
-                    // 수정 조건을 만족하는 경우, 수정된 컨텐츠 정보를 저장
-                    if (
-                        contents.contentsName !== mediaData.contentsName ||
-                        contents.mediaData !== mediaData.mediaData ||
-                        contents.videoStartTime !== mediaData.videoStartTime ||
-                        contents.videoPlayDuration !== mediaData.videoPlayDuration
-                    ) {
-                        const modifiedContent = {
-                            ...contents,
-                            contentsName: mediaData.contentsName,
-                            mediaData: mediaData.mediaData,
-                            videoStartTime: mediaData.videoStartTime,
-                            videoPlayDuration: mediaData.videoPlayDuration,
-                        };
+                    const modifiedContent = applyManagedContentEdit(contents, mediaData);
+                    if (modifiedContent) {
                         updateResult.content = modifiedContent;
                         return modifiedContent;
                     }

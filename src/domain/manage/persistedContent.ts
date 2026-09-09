@@ -62,6 +62,34 @@ export interface ManagedContentDraft {
     detailFileType: string;
 }
 
+type ManagedContentEdit = Pick<
+    ManagedContent,
+    'contentsName' | 'visibleType' | 'mediaData' | 'videoStartTime' | 'videoPlayDuration' | 'detailFileType'
+>;
+
+const managedContentEditFields: Array<keyof ManagedContentEdit> = [
+    'contentsName',
+    'visibleType',
+    'mediaData',
+    'videoStartTime',
+    'videoPlayDuration',
+    'detailFileType',
+];
+
+export const applyManagedContentEdit = (
+    content: ManagedContent,
+    edit: ManagedContentEdit
+): ManagedContent | undefined => {
+    if (managedContentEditFields.every((field) => content[field] === edit[field])) {
+        return undefined;
+    }
+
+    return {
+        ...content,
+        ...Object.fromEntries(managedContentEditFields.map((field) => [field, edit[field]])),
+    };
+};
+
 export const normalizePersistedManagedContent = (
     content: PersistedManagedContent,
     mediaFile: ManagedMediaFile | undefined,

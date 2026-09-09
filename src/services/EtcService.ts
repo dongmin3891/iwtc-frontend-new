@@ -7,7 +7,7 @@ interface ManagedMediaFileResponse {
 
 export const getMediaFileAPI = async (mediaFileId: number, type?: string) => {
     const params = {
-        size: type ? type : undefined,
+        size: type || 'original',
     };
     if (!mediaFileId) return;
     try {
@@ -19,6 +19,8 @@ export const getMediaFileAPI = async (mediaFileId: number, type?: string) => {
 };
 
 export const getMediaFile = async (mediaFileId: number) => {
-    const response = await ajaxGet<ManagedMediaFileResponse>(`/media-files/${mediaFileId}`);
+    const response = await ajaxGet<ManagedMediaFileResponse>(`/media-files/${mediaFileId}`, {
+        params: { size: 'original' },
+    });
     return response;
 };
