@@ -23,6 +23,9 @@ const createDraft = (overrides: Partial<ManagedContentDraft> = {}): ManagedConte
     ...overrides,
 });
 
+const imageFile = (overrides: Partial<File> = {}): File =>
+    ({ name: 'candidate.png', type: 'image/png', size: 1024, ...overrides }) as File;
+
 describe('normalizeClientManagedContent', () => {
     it('maps newly added content to the card model', () => {
         assert.deepEqual(
@@ -122,17 +125,24 @@ describe('validateManagedContentDraft', () => {
         assert.equal(validateManagedContentDraft(createDraft()), null);
     });
 
-    it('blocks static file candidates until the backend supports them', () => {
+    it('requires a supported image file no larger than 10MB', () => {
         assert.equal(
             validateManagedContentDraft(createDraft({ fileType: 'file', mediaPath: '', originalName: '' })),
-            '현재는 유튜브 영상 후보만 등록할 수 있습니다.'
+            '이미지 파일을 선택해주세요.'
         );
         assert.equal(
             validateManagedContentDraft(
-                createDraft({ fileType: 'file', mediaPath: 'data:image/png;base64,example', originalName: 'a.png' })
+                createDraft({ fileType: 'file', uploadFile: imageFile({ type: 'image/webp' }) })
             ),
-            '현재는 유튜브 영상 후보만 등록할 수 있습니다.'
+            'JPEG, PNG 또는 GIF 이미지 파일만 등록할 수 있습니다.'
         );
+        assert.equal(
+            validateManagedContentDraft(
+                createDraft({ fileType: 'file', uploadFile: imageFile({ size: 10 * 1024 * 1024 + 1 }) })
+            ),
+            '이미지 파일은 10MB 이하여야 합니다.'
+        );
+        assert.equal(validateManagedContentDraft(createDraft({ fileType: 'file', uploadFile: imageFile() })), null);
     });
 });
 

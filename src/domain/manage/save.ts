@@ -13,6 +13,12 @@ interface SaveWorldCupContentChangesInput {
     newList: ManagedContent[];
 }
 
+interface CreateNewWorldCupContentsInput {
+    worldCupId: number;
+    accessToken: string;
+    contents: ManagedContent[];
+}
+
 export interface WorldCupContentSaveDependencies {
     removeContent: (worldCupId: number, contentsId: number, token: string) => Promise<unknown>;
     updateContent: (
@@ -26,7 +32,50 @@ export interface WorldCupContentSaveDependencies {
         params: ReturnType<typeof createWorldCupContentRequests>;
         token: string;
     }) => Promise<unknown>;
+    createStaticContent: (input: {
+        worldCupId: number;
+        contentsName: string;
+        visibleType: string;
+        file: File;
+        token: string;
+    }) => Promise<unknown>;
 }
+
+export const createNewWorldCupContents = async (
+    { worldCupId, accessToken, contents }: CreateNewWorldCupContentsInput,
+    dependencies: Pick<WorldCupContentSaveDependencies, 'createContents' | 'createStaticContent'>
+): Promise<void> => {
+    const requests: Promise<unknown>[] = [];
+    const videoContents = contents.filter((item) => item.fileType !== 'file');
+    const staticContents = contents.filter((item) => item.fileType === 'file');
+
+    if (videoContents.length > 0) {
+        requests.push(
+            dependencies.createContents({
+                worldCupId,
+                params: createWorldCupContentRequests(videoContents),
+                token: accessToken,
+            })
+        );
+    }
+
+    requests.push(
+        ...staticContents.map((item) => {
+            if (!item.uploadFile) {
+                return Promise.reject(new Error('이미지 파일이 없습니다.'));
+            }
+            return dependencies.createStaticContent({
+                worldCupId,
+                contentsName: item.contentsName,
+                visibleType: item.visibleType,
+                file: item.uploadFile,
+                token: accessToken,
+            });
+        })
+    );
+
+    await Promise.all(requests);
+};
 
 export const saveWorldCupContentChanges = async (
     { worldCupId, accessToken, deleteList, modifyList, newList }: SaveWorldCupContentChangesInput,
@@ -53,11 +102,10 @@ export const saveWorldCupContentChanges = async (
 
     if (newList.length > 0) {
         requests.push(
-            dependencies.createContents({
-                worldCupId,
-                params: createWorldCupContentRequests(newList),
-                token: accessToken,
-            })
+            createNewWorldCupContents(
+                { worldCupId, accessToken, contents: newList },
+                dependencies
+            )
         );
     }
 

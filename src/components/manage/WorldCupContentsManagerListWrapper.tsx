@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useContext } from 'react';
 import WorldCupContentsManageList from './WorldCupContentsManageList';
 import {
+    createStaticWorldCupContent,
     createWorldCupContents,
     removeMyWorldCupContents,
     updateMyWorldCupContents,
@@ -12,8 +13,7 @@ import { PopupContext } from '@/providers/PopupProvider';
 import NotCreateWorldCupLogo from './NotCreateWorldCupLogo';
 import { useRouter } from 'next/navigation';
 import { ManagedContent, PersistedManagedContentView } from '@/domain/manage/persistedContent';
-import { createWorldCupContentRequests } from '@/domain/manage/content';
-import { saveWorldCupContentChanges } from '@/domain/manage/save';
+import { createNewWorldCupContents, saveWorldCupContentChanges } from '@/domain/manage/save';
 
 interface IProps {
     isCreateWorldCup: boolean;
@@ -57,8 +57,7 @@ const WorldCupContentsManageListWrapper = ({
      * 수정된 월드컵 컨텐츠 서버에 전송
      */
     const createNewWorldCupContentsList = () => {
-        const bindingNewWorldCupContents = createWorldCupContentRequests(worldCupContentsList);
-        if (bindingNewWorldCupContents.length === 0) {
+        if (worldCupContentsList.length === 0) {
             showAlertPopup('새로운 컨텐츠가 없습니다.');
             return;
         }
@@ -66,8 +65,8 @@ const WorldCupContentsManageListWrapper = ({
 
         mutationWorldCupContents.mutate({
             worldCupId: worldCupId,
-            params: bindingNewWorldCupContents,
-            token: token,
+            accessToken: token,
+            contents: worldCupContentsList,
         });
     };
 
@@ -85,6 +84,7 @@ const WorldCupContentsManageListWrapper = ({
                 removeContent: removeMyWorldCupContents,
                 updateContent: updateMyWorldCupContents,
                 createContents: createWorldCupContents,
+                createStaticContent: createStaticWorldCupContent,
             }
         )
             .then(() => {
@@ -99,7 +99,13 @@ const WorldCupContentsManageListWrapper = ({
             });
     };
 
-    const mutationWorldCupContents = useMutation(createWorldCupContents, {
+    const mutationWorldCupContents = useMutation(
+        (input: { worldCupId: number; accessToken: string; contents: ManagedContent[] }) =>
+            createNewWorldCupContents(input, {
+                createContents: createWorldCupContents,
+                createStaticContent: createStaticWorldCupContent,
+            }),
+        {
         onSuccess: () => {
             showAlertPopup('성공');
             router.push('/');
@@ -107,7 +113,8 @@ const WorldCupContentsManageListWrapper = ({
         onError: () => {
             showAlertPopup('error');
         },
-    });
+        }
+    );
 
     const showAlertPopup = (message: string) => {
         showPopup(<AlertPopup message={message} hidePopup={hidePopup} />);

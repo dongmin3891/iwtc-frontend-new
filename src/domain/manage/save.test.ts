@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { ManagedContent, PersistedManagedContentView } from './persistedContent';
-import { saveWorldCupContentChanges, WorldCupContentSaveDependencies } from './save';
+import {
+    createNewWorldCupContents,
+    saveWorldCupContentChanges,
+    WorldCupContentSaveDependencies,
+} from './save';
 
 const persistedContent = (contentsId: number, contentsName: string): PersistedManagedContentView => ({
     id: contentsId,
@@ -34,6 +38,7 @@ describe('saveWorldCupContentChanges', () => {
             createContents: async ({ worldCupId, params, token }) => {
                 calls.push(`create:${worldCupId}:${params.length}:${token}`);
             },
+            createStaticContent: async () => {},
         };
 
         await saveWorldCupContentChanges(
@@ -58,6 +63,7 @@ describe('saveWorldCupContentChanges', () => {
             createContents: async () => {
                 createCalls += 1;
             },
+            createStaticContent: async () => {},
         };
 
         await saveWorldCupContentChanges(
@@ -79,6 +85,7 @@ describe('saveWorldCupContentChanges', () => {
                 calls.push(`update:${worldCupId}:${contentsId}`);
             },
             createContents: async () => {},
+            createStaticContent: async () => {},
         };
 
         await saveWorldCupContentChanges(
@@ -102,6 +109,7 @@ describe('saveWorldCupContentChanges', () => {
             },
             updateContent: async () => {},
             createContents: async () => {},
+            createStaticContent: async () => {},
         };
 
         await assert.rejects(
@@ -117,5 +125,66 @@ describe('saveWorldCupContentChanges', () => {
             ),
             /delete failed/
         );
+    });
+
+    it('sends video candidates as one batch and each image as multipart input', async () => {
+        const calls: string[] = [];
+        const file = { name: 'candidate.png', type: 'image/png', size: 8 } as File;
+
+        await createNewWorldCupContents(
+            {
+                worldCupId: 10,
+                accessToken: 'token',
+                contents: [
+                    newContent,
+                    {
+                        id: 4,
+                        contentsName: 'image',
+                        visibleType: 'PUBLIC',
+                        fileType: 'file',
+                        uploadFile: file,
+                    },
+                ],
+            },
+            {
+                createContents: async ({ params }) => {
+                    calls.push(`videos:${params.length}`);
+                },
+                createStaticContent: async (input) => {
+                    assert.equal(input.file, file);
+                    calls.push(`image:${input.contentsName}:${input.visibleType}`);
+                },
+            }
+        );
+
+        assert.deepEqual(calls, ['videos:1', 'image:image:PUBLIC']);
+    });
+
+    it('does not send an empty video batch for image-only candidates', async () => {
+        let videoBatchCalls = 0;
+
+        await createNewWorldCupContents(
+            {
+                worldCupId: 10,
+                accessToken: 'token',
+                contents: [
+                    {
+                        id: 4,
+                        contentsName: 'image',
+                        visibleType: 'PRIVATE',
+                        fileType: 'file',
+                        uploadFile: { name: 'candidate.gif', type: 'image/gif', size: 6 } as File,
+                    },
+                ],
+            },
+            {
+                createContents: async () => {
+                    videoBatchCalls += 1;
+                },
+                createStaticContent: async () => {},
+            }
+        );
+
+        assert.equal(videoBatchCalls, 0);
     });
 });

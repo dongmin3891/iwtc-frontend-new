@@ -16,6 +16,10 @@ interface CreateWorldCupResponse {
     data: number;
 }
 
+interface CreateStaticWorldCupContentResponse {
+    data: number;
+}
+
 interface DeleteMyWorldCupRequest {
     worldCupId: number;
     token: string;
@@ -75,6 +79,39 @@ export const createWorldCupContents = async ({
         `/me/game-contents-manage/world-cups/${worldCupId}/contents`,
         requestBody,
         { headers: authHeaders }
+    );
+
+    return response.data;
+};
+
+export const createStaticWorldCupContent = async ({
+    worldCupId,
+    contentsName,
+    visibleType,
+    file,
+    token,
+}: {
+    worldCupId: number;
+    contentsName: string;
+    visibleType: string;
+    file: File;
+    token: string;
+}) => {
+    const formData = new FormData();
+    formData.append('contentsName', contentsName);
+    formData.append('visibleType', visibleType);
+    formData.append('file', file);
+
+    const response = await ajaxPost<CreateStaticWorldCupContentResponse, FormData>(
+        `/me/game-contents-manage/world-cups/${worldCupId}/contents/static`,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'access-token': token,
+            },
+            timeout: 15000,
+        }
     );
 
     return response.data;

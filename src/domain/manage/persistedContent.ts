@@ -42,6 +42,7 @@ export interface ManagedContent {
     detailFileType?: string;
     originalName?: string;
     absoluteName?: string;
+    uploadFile?: File;
 }
 
 export interface PersistedManagedContentView extends ManagedContent {
@@ -60,6 +61,7 @@ export interface ManagedContentDraft {
     mp4Type: string;
     imgType: string;
     detailFileType: string;
+    uploadFile?: File;
 }
 
 type ManagedContentEdit = Pick<

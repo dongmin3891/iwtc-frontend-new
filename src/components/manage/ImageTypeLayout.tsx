@@ -22,11 +22,10 @@ const ImageTypeLayout = ({
     imgType,
 }: IProps) => {
     const readImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        setIsImageLoaded(true);
-
         if (!e.target.files?.length) return;
 
         const imageFile = e.target.files[0];
+        setIsImageLoaded(true);
         const reader = new FileReader();
 
         reader.addEventListener('load', (e: ProgressEvent<FileReader>) => {
@@ -35,6 +34,7 @@ const ImageTypeLayout = ({
             setWorldCupContents((prevWorldCupContents) => ({
                 ...prevWorldCupContents,
                 ...createImageDraftFields(imageFile, readerResult),
+                uploadFile: imageFile,
             }));
         });
 
@@ -51,7 +51,7 @@ const ImageTypeLayout = ({
                     id="formFileMultiple"
                     name="mediaPath"
                     onChange={readImage}
-                    multiple
+                    accept="image/jpeg,image/png,image/gif"
                 />
                 {isImageLoaded === true ? (
                     <div style={{ marginTop: '10px' }}>

@@ -82,7 +82,17 @@ export const validateManagedContentDraft = (contents: ManagedContentDraft): stri
     }
 
     if (contents.fileType === 'file') {
-        return '현재는 유튜브 영상 후보만 등록할 수 있습니다.';
+        if (!contents.uploadFile) {
+            return '이미지 파일을 선택해주세요.';
+        }
+
+        if (!['image/jpeg', 'image/png', 'image/gif'].includes(contents.uploadFile.type)) {
+            return 'JPEG, PNG 또는 GIF 이미지 파일만 등록할 수 있습니다.';
+        }
+
+        if (contents.uploadFile.size > 10 * 1024 * 1024) {
+            return '이미지 파일은 10MB 이하여야 합니다.';
+        }
     }
 
     if (contents.fileType === 'video') {
