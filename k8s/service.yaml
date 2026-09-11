@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: iwtc-frontend
+    namespace: iwtc
+spec:
+    type: ClusterIP
+    selector:
+        app: iwtc-frontend
+    ports:
+        - name: http
+          port: 80
+          targetPort: http

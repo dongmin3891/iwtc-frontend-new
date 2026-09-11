@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.env.development
+.env.local
+.test-dist
+.playwright-cli
+coverage
+npm-debug.log

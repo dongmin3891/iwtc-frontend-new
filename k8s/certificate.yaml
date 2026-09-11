@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+    name: iwtc-frontend-cert
+    namespace: iwtc
+spec:
+    secretName: iwtc-frontend-tls
+    issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+    dnsNames:
+        - iwtc.ddongmy.com
