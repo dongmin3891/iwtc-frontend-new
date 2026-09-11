@@ -1,5 +1,4 @@
 import { ManagedContent, PersistedManagedContentView } from '@/domain/manage/persistedContent';
-import Image from 'next/image';
 import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 interface IProps {
@@ -218,11 +217,11 @@ const StaticMediaFileTypeCard = ({
                                 ></video>
                             )}
                             {mediaData.imgType && (
-                                <Image
+                                <img
                                     className="w-full h-52"
                                     src={mediaData.mediaData}
-                                    width={'10'}
-                                    height={'10'}
+                                    width={10}
+                                    height={10}
                                     alt="img"
                                 />
                             )}
