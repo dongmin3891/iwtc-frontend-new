@@ -68,6 +68,33 @@ describe('saveWorldCupContentChanges', () => {
         assert.equal(createCalls, 0);
     });
 
+    it('does not update a persisted content that is also queued for deletion', async () => {
+        const calls: string[] = [];
+        const deletedContent = persistedContent(1, 'deleted after edit');
+        const dependencies: WorldCupContentSaveDependencies = {
+            removeContent: async (worldCupId, contentsId) => {
+                calls.push(`delete:${worldCupId}:${contentsId}`);
+            },
+            updateContent: async (worldCupId, contentsId) => {
+                calls.push(`update:${worldCupId}:${contentsId}`);
+            },
+            createContents: async () => {},
+        };
+
+        await saveWorldCupContentChanges(
+            {
+                worldCupId: 10,
+                accessToken: 'token',
+                deleteList: [deletedContent],
+                modifyList: [deletedContent, persistedContent(2, 'modified')],
+                newList: [],
+            },
+            dependencies
+        );
+
+        assert.deepEqual(calls, ['delete:10:1', 'update:10:2']);
+    });
+
     it('propagates a failed request to the caller', async () => {
         const dependencies: WorldCupContentSaveDependencies = {
             removeContent: async () => {

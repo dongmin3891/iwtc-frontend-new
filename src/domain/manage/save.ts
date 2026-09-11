@@ -33,19 +33,22 @@ export const saveWorldCupContentChanges = async (
     dependencies: WorldCupContentSaveDependencies
 ): Promise<void> => {
     const requests: Promise<unknown>[] = [];
+    const deletedContentIds = new Set(deleteList.map((item) => item.contentsId));
 
     requests.push(
         ...deleteList.map((item) => dependencies.removeContent(worldCupId, item.contentsId, accessToken))
     );
     requests.push(
-        ...modifyList.map((item) =>
-            dependencies.updateContent(
-                worldCupId,
-                item.contentsId,
-                createUpdateWorldCupContentRequest(item),
-                accessToken
+        ...modifyList
+            .filter((item) => !deletedContentIds.has(item.contentsId))
+            .map((item) =>
+                dependencies.updateContent(
+                    worldCupId,
+                    item.contentsId,
+                    createUpdateWorldCupContentRequest(item),
+                    accessToken
+                )
             )
-        )
     );
 
     if (newList.length > 0) {
