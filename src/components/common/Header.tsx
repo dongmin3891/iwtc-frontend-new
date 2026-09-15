@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import React, { MouseEvent, useContext } from 'react';
+import React, { MouseEvent, useContext, useState } from 'react';
 import SignInUpButton from '../header/SignInUpButton';
 import { useAuth } from '@/providers/AuthProvider';
 import { PopupContext } from '@/providers/PopupProvider';
@@ -11,62 +11,93 @@ const Header = () => {
     const { isLoggedIn, user } = useAuth();
     const { showPopup, hidePopup } = useContext(PopupContext);
     const userId = user?.id ?? '';
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const handleLoginBaseService = (e: MouseEvent<HTMLAnchorElement>) => {
+    const handleLoginBaseService = (event: MouseEvent<HTMLAnchorElement>) => {
         if (!isLoggedIn) {
-            e.preventDefault(); // 링크의 기본 동작을 방지합니다.
+            event.preventDefault();
             showPopup(<AlertPopup message="로그인이 필요한 서비스입니다." hidePopup={hidePopup} />);
         }
-        // 로그인 상태에서는 링크의 기본 동작을 계속 진행합니다.
     };
 
     return (
-        <nav
-            style={{ backgroundColor: '#2b6cb0' }}
-            className="flex items-center justify-between flex-wrap p-6 relative"
-        >
-            <div className="flex items-center flex-shrink-0 text-white mr-6">
-                <svg
-                    className="fill-current h-8 w-8 mr-2"
-                    width="54"
-                    height="54"
-                    viewBox="0 0 54 54"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path d="M13.5 22.1c1.8-7.2 6.3-10.8 13.5-10.8 10.8 0 12.15 8.1 17.55 9.45 3.6.9 6.75-.45 9.45-4.05-1.8 7.2-6.3 10.8-13.5 10.8-10.8 0-12.15-8.1-17.55-9.45-3.6-.9-6.75.45-9.45 4.05zM0 38.3c1.8-7.2 6.3-10.8 13.5-10.8 10.8 0 12.15 8.1 17.55 9.45 3.6.9 6.75-.45 9.45-4.05-1.8 7.2-6.3 10.8-13.5 10.8-10.8 0-12.15-8.1-17.55-9.45-3.6-.9-6.75.45-9.45 4.05z" />
-                </svg>
-                <span className="version-number text-white text-sm mr-2" style={{ bottom: '20px', left: '40px' }}>
-                    v{VERSION}
-                </span>
-                <Link href="/">
-                    <span className="font-semibold text-xl tracking-tight">이상형 월드컵</span>
+        <nav className="sticky top-0 z-[60] border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+            <div className="mx-auto flex min-h-[72px] max-w-7xl flex-wrap items-center justify-between px-5 sm:px-8 lg:px-10">
+                <Link href="/" className="group flex items-center gap-3" onClick={() => setIsMenuOpen(false)}>
+                    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 text-sm font-black text-white shadow-lg shadow-violet-600/20 transition group-hover:-rotate-3 group-hover:scale-105">
+                        W
+                    </span>
+                    <span>
+                        <span className="block text-lg font-black tracking-[-0.03em] text-slate-950">IWTC</span>
+                        <span className="block text-[10px] font-bold tracking-[0.14em] text-slate-400">
+                            IDEAL WORLD CUP · v{VERSION}
+                        </span>
+                    </span>
                 </Link>
-            </div>
-            <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
-                <div className="text-lg lg:flex-grow">
-                    <Link
-                        href="/manage"
-                        className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
-                        onClick={handleLoginBaseService}
-                    >
-                        월드컵 만들기
-                    </Link>
 
-                    <Link
-                        href={`/members/${userId}/games`}
-                        className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
-                        onClick={handleLoginBaseService}
+                <button
+                    type="button"
+                    className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 text-slate-700 transition hover:bg-slate-50 lg:hidden"
+                    aria-label={isMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+                    aria-expanded={isMenuOpen}
+                    onClick={() => setIsMenuOpen((current) => !current)}
+                >
+                    <svg
+                        aria-hidden="true"
+                        className="h-5 w-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                     >
-                        자신의 월드컵 목록
-                    </Link>
-                    <Link
-                        href={`https://stingy-sort-6b7.notion.site/36bf75ec4a0d4c888852a4d7bb13ff76?pvs=4`}
-                        className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
-                    >
-                        패치노트
-                    </Link>
+                        {isMenuOpen ? (
+                            <path strokeLinecap="round" d="M6 6l12 12M18 6 6 18" />
+                        ) : (
+                            <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+                        )}
+                    </svg>
+                </button>
+
+                <div
+                    className={`${
+                        isMenuOpen ? 'flex' : 'hidden'
+                    } w-full flex-col gap-2 border-t border-slate-100 py-4 lg:flex lg:w-auto lg:flex-row lg:items-center lg:gap-1 lg:border-0 lg:py-0`}
+                >
+                    <div className="flex flex-col lg:flex-row lg:items-center">
+                        <Link
+                            href="/manage"
+                            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
+                            onClick={(event) => {
+                                handleLoginBaseService(event);
+                                setIsMenuOpen(false);
+                            }}
+                        >
+                            월드컵 만들기
+                        </Link>
+                        <Link
+                            href={`/members/${userId}/games`}
+                            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
+                            onClick={(event) => {
+                                handleLoginBaseService(event);
+                                setIsMenuOpen(false);
+                            }}
+                        >
+                            내 월드컵
+                        </Link>
+                        <Link
+                            href="https://stingy-sort-6b7.notion.site/36bf75ec4a0d4c888852a4d7bb13ff76?pvs=4"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
+                            onClick={() => setIsMenuOpen(false)}
+                        >
+                            패치노트
+                        </Link>
+                    </div>
+                    <div className="mt-2 border-t border-slate-100 pt-4 lg:ml-3 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+                        <SignInUpButton />
+                    </div>
                 </div>
-                <SignInUpButton />
             </div>
         </nav>
     );

@@ -1,36 +1,48 @@
 'use client';
-import React, { ChangeEvent, KeyboardEvent, Dispatch, SetStateAction, useState } from 'react';
+import React, { ChangeEvent, Dispatch, FormEvent, SetStateAction, useState } from 'react';
 
 interface IProps {
     setKeyword: Dispatch<SetStateAction<undefined | string>>;
 }
 
 const SearchBar = ({ setKeyword }: IProps) => {
-    const [text, setText] = useState<undefined | string>('');
+    const [text, setText] = useState('');
 
     const onChangeKeyword = (e: ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
-        setText(value ? value : undefined);
+        setText(value);
     };
 
     const onClickSearch = () => {
-        setKeyword(text);
+        setKeyword(text.trim() || undefined);
     };
-    const handleOnKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            onClickSearch();
-        }
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        onClickSearch();
     };
 
     return (
-        <div className="ml-4 w-200">
-            <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">
-                Search
+        <form className="w-full" onSubmit={handleSubmit}>
+            <label htmlFor="world-cup-search" className="mb-2 block text-xs font-bold text-slate-500">
+                월드컵 검색
             </label>
             <div className="relative">
-                <div className="absolute right-0 inset-y-0 flex items-center pr-3 " onClick={onClickSearch}>
+                <input
+                    type="search"
+                    id="world-cup-search"
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 pr-12 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+                    placeholder="제목이나 키워드를 검색하세요"
+                    onChange={onChangeKeyword}
+                    value={text}
+                />
+                <button
+                    type="submit"
+                    className="absolute inset-y-1.5 right-1.5 grid w-9 place-items-center rounded-xl text-slate-500 transition hover:bg-violet-50 hover:text-violet-700"
+                    aria-label="검색"
+                >
                     <svg
-                        className="w-4 h-4 text-gray-500 dark:text-gray-400 "
+                        className="h-4 w-4"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -44,19 +56,9 @@ const SearchBar = ({ setKeyword }: IProps) => {
                             d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
                         />
                     </svg>
-                </div>
-                <input
-                    type="search"
-                    id="default-search"
-                    className="block p-4 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="키워드를 검색하세요."
-                    required
-                    onChange={(e) => onChangeKeyword(e)}
-                    onKeyPress={(e) => handleOnKeyPress(e)}
-                    value={text}
-                />
+                </button>
             </div>
-        </div>
+        </form>
     );
 };
 

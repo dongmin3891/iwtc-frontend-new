@@ -30,32 +30,24 @@ const SignInUpButton = () => {
 
     if (isLoggedIn) {
         return (
-            <div onClick={() => onClickHandler(true)}>
-                <a
-                    href="#"
-                    className="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
-                    onClick={(e) => {
-                        e.preventDefault();
-                    }}
-                >
-                    {'Logout'}
-                </a>
-            </div>
+            <button
+                type="button"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 lg:w-auto"
+                onClick={() => onClickHandler(true)}
+            >
+                로그아웃
+            </button>
         );
     }
 
     return (
-        <div onClick={() => onClickHandler(false)}>
-            <a
-                href="#"
-                className="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 lg:mt-0"
-                onClick={(e) => {
-                    e.preventDefault();
-                }}
-            >
-                {'Login'}
-            </a>
-        </div>
+        <button
+            type="button"
+            className="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-violet-700 lg:w-auto"
+            onClick={() => onClickHandler(false)}
+        >
+            로그인
+        </button>
     );
 };
 

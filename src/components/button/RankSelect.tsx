@@ -1,64 +1,51 @@
 'use client';
 import { TimeTab } from '@/interfaces/models/tab/TimeTab';
 import React, { Dispatch, SetStateAction, useState } from 'react';
+
+const TIME_FILTERS: TimeTab[] = [
+    { id: 1, name: '전체', active: true, type: 'ALL' },
+    { id: 2, name: '년', active: false, type: 'YEAR' },
+    { id: 3, name: '월', active: false, type: 'MONTH' },
+    { id: 4, name: '일', active: false, type: 'DAY' },
+];
+
 interface IProps {
     setRank: Dispatch<SetStateAction<string>>;
 }
 
 const RankSelect = ({ setRank }: IProps) => {
-    const [tabList, setTabList] = useState<TimeTab[]>([
-        {
-            id: 1,
-            name: '전체',
-            active: true,
-            type: 'ALL',
-        },
-        {
-            id: 2,
-            name: '년',
-            active: false,
-            type: 'YEAR',
-        },
-        {
-            id: 3,
-            name: '월',
-            active: false,
-            type: 'MONTH',
-        },
-        {
-            id: 4,
-            name: '일',
-            active: false,
-            type: 'DAY',
-        },
-    ]);
+    const [selectedRank, setSelectedRank] = useState<TimeTab['type']>('ALL');
 
     const handleTab = (list: TimeTab): void => {
-        const { id, type } = list;
-        setRank(type);
-        setTabList(tabList.map((list) => (list.id === id ? { ...list, active: true } : { ...list, active: false })));
+        setRank(list.type);
+        setSelectedRank(list.type);
     };
 
     return (
-        <ul className="ml-4 w-200 flex flex-wrap text-sm font-medium text-center text-gray-50">
-            {tabList.map((list: TimeTab) => {
-                return (
-                    <li className="mr-2" key={list.id} onClick={() => handleTab(list)}>
-                        <a
-                            className={`inline-block px-4 py-3 text-gray-400 ${
-                                list.active ? 'bg-blue-100 active' : 'bg-gray-100'
-                            } rounded-lg`}
-                            // aria-current="page"
-                            onClick={(e) => {
-                                e.preventDefault();
-                            }}
+        <fieldset className="w-full">
+            <legend className="mb-2 text-xs font-bold text-slate-500">등록 기간</legend>
+            <div className="grid h-12 grid-cols-4 rounded-2xl bg-slate-100 p-1">
+                {TIME_FILTERS.map((filter) => {
+                    const isActive = filter.type === selectedRank;
+
+                    return (
+                        <button
+                            type="button"
+                            key={filter.id}
+                            className={`rounded-xl px-3 text-sm font-bold transition ${
+                                isActive
+                                    ? 'bg-white text-violet-700 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-800'
+                            }`}
+                            aria-pressed={isActive}
+                            onClick={() => handleTab(filter)}
                         >
-                            {list.name}
-                        </a>
-                    </li>
-                );
-            })}
-        </ul>
+                            {filter.name}
+                        </button>
+                    );
+                })}
+            </div>
+        </fieldset>
     );
 };
 

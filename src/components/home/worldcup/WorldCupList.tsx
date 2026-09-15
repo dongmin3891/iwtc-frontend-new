@@ -6,9 +6,10 @@ import { WCListViewData } from '@/interfaces/models/world-cup/WcListData';
 
 interface WorldCupListProps {
     wcList: WCListViewData;
+    priority?: boolean;
 }
 
-const WorldCupList = ({ wcList }: WorldCupListProps) => {
+const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
     const {
         gameTitle,
         reftContentName,
@@ -24,84 +25,103 @@ const WorldCupList = ({ wcList }: WorldCupListProps) => {
         description,
         worldCupId,
     } = wcList;
+
+    const renderPreview = (
+        fileType: string,
+        mediaSource: string,
+        contentName: string,
+        videoStartTime?: string,
+        videoPlayDuration?: number
+    ) => {
+        if (fileType === 'INTERNET_VIDEO_URL') {
+            return (
+                <div className="h-full w-full [&_iframe]:pointer-events-none [&_iframe]:h-full [&_iframe]:w-full">
+                    <CustomYoutubePlayer
+                        videoUrl={mediaSource}
+                        time={videoStartTime}
+                        width="100%"
+                        height="100%"
+                        playDuration={videoPlayDuration}
+                    />
+                </div>
+            );
+        }
+
+        if (isMP4(mediaSource)) {
+            return <video className="h-full w-full object-cover" src={mediaSource} autoPlay muted loop playsInline />;
+        }
+
+        return (
+            <Image
+                className="object-cover transition duration-500 group-hover:scale-105"
+                src={mediaSource}
+                fill
+                priority={priority}
+                sizes="(max-width: 640px) 50vw, (max-width: 1280px) 25vw, 200px"
+                alt={contentName || '후보 이미지'}
+            />
+        );
+    };
+
     return (
-        <div className="p-4 max-w-sm">
-            <div className="w-120 h-128 rounded overflow-hidden shadow-lg">
-                <Link href={`/play-game/${worldCupId}`}>
-                    <div className="flex h-2/3">
-                        <div className="flex-1">
-                            {reftFileType === 'INTERNET_VIDEO_URL' ? (
-                                <div className="flex items-center justify-center h-full">
-                                    <CustomYoutubePlayer
-                                        videoUrl={reftImgMediaFileNo}
-                                        time={reftVideoStartTime}
-                                        width={'100%'}
-                                        height={'100%'}
-                                        playDuration={reftVideoPlayDuration}
-                                    />
-                                </div>
-                            ) : isMP4(reftImgMediaFileNo) ? (
-                                <div className="flex items-center justify-center h-full">
-                                    <video
-                                        src={reftImgMediaFileNo}
-                                        width={'100%'}
-                                        height={'100%'}
-                                        autoPlay
-                                        muted
-                                        loop
-                                    />
-                                </div>
-                            ) : (
-                                <Image
-                                    className="w-full h-52"
-                                    src={reftImgMediaFileNo}
-                                    width={'50'}
-                                    height={'10'}
-                                    alt={reftContentName ? reftContentName : '제공예정'}
-                                />
-                            )}
-                        </div>
-                        <div className="flex-1">
-                            {rightFileType === 'INTERNET_VIDEO_URL' ? (
-                                <div className="flex items-center justify-center h-full">
-                                    <CustomYoutubePlayer
-                                        videoUrl={rightImgMediaFileNo}
-                                        time={rightVideoStartTime}
-                                        width={'100%'}
-                                        height={'100%'}
-                                        playDuration={rightVideoPlayDuration}
-                                    />
-                                </div>
-                            ) : isMP4(rightImgMediaFileNo) ? (
-                                <div className="flex items-center justify-center h-full">
-                                    <video
-                                        src={rightImgMediaFileNo}
-                                        width={'100%'}
-                                        height={'100%'}
-                                        autoPlay
-                                        muted
-                                        loop
-                                    />
-                                </div>
-                            ) : (
-                                <Image
-                                    className="w-full h-52"
-                                    src={rightImgMediaFileNo}
-                                    width={'50'}
-                                    height={'10'}
-                                    alt={rightContentName ? rightContentName : '제공예정'}
-                                />
-                            )}
+        <article className="group min-w-0">
+            <Link
+                href={`/play-game/${worldCupId}`}
+                className="block overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1.5 hover:border-violet-200 hover:shadow-[0_20px_45px_rgba(79,70,229,0.14)]"
+            >
+                <div className="relative grid aspect-[16/10] grid-cols-2 overflow-hidden bg-slate-100">
+                    <div className="relative min-w-0 overflow-hidden border-r border-white/30">
+                        {renderPreview(
+                            reftFileType,
+                            reftImgMediaFileNo,
+                            reftContentName,
+                            reftVideoStartTime,
+                            reftVideoPlayDuration
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-4 pb-3 pt-10">
+                            <p className="truncate text-sm font-bold text-white">{reftContentName || '후보 준비 중'}</p>
                         </div>
                     </div>
-                    <div className="px-6 py-4 h-1/3">
-                        <div className="font-bold text-xl mb-2">{gameTitle}</div>
-                        <p className="text-gray-700 text-base">{description}</p>
-                        <p className="text-gray-700 text-base">{''}</p>
+                    <div className="relative min-w-0 overflow-hidden">
+                        {renderPreview(
+                            rightFileType,
+                            rightImgMediaFileNo,
+                            rightContentName,
+                            rightVideoStartTime,
+                            rightVideoPlayDuration
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-4 pb-3 pt-10 text-right">
+                            <p className="truncate text-sm font-bold text-white">
+                                {rightContentName || '후보 준비 중'}
+                            </p>
+                        </div>
                     </div>
-                </Link>
-            </div>
-        </div>
+                    <span className="absolute left-1/2 top-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-white bg-slate-950 text-[11px] font-black italic tracking-tight text-white shadow-xl">
+                        VS
+                    </span>
+                </div>
+
+                <div className="p-5 sm:p-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                            <h3 className="truncate text-xl font-black tracking-[-0.025em] text-slate-950">
+                                {gameTitle}
+                            </h3>
+                            <p className="mt-2 line-clamp-2 min-h-[40px] text-sm leading-5 text-slate-500">
+                                {description || '어떤 후보가 마지막까지 살아남을까요?'}
+                            </p>
+                        </div>
+                        <span className="mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full bg-violet-50 text-lg text-violet-700 transition group-hover:bg-violet-600 group-hover:text-white">
+                            →
+                        </span>
+                    </div>
+                    <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+                        <span className="text-[11px] font-black tracking-[0.14em] text-violet-600">START GAME</span>
+                        <span className="text-xs font-semibold text-slate-400">클릭해서 시작</span>
+                    </div>
+                </div>
+            </Link>
+        </article>
     );
 };
 
