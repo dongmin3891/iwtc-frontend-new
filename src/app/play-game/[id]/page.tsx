@@ -27,7 +27,12 @@ const Page = ({ params }: { params: { id: string } }) => {
     const router = useRouter();
 
     const worldCupId = Number(params.id);
-    const { data: roundList } = useQueryGetWorldCupGameRound(worldCupId);
+    const {
+        data: roundList,
+        isLoading: isRoundListLoading,
+        isError: isRoundListError,
+        refetch: refetchRoundList,
+    } = useQueryGetWorldCupGameRound(worldCupId);
     const [selectRound, setSelectRound] = useState<number>(0);
     const [isPlay, setIsPlay] = useState<boolean>(false);
     const [gameList, setGameList] = useState<GameContentView[]>([]);
@@ -126,7 +131,18 @@ const Page = ({ params }: { params: { id: string } }) => {
     };
 
     if (!isPlay) {
-        return <RoundPopup roundList={roundList} onSelectRound={handleRoundSelect} />;
+        return (
+            <RoundPopup
+                roundList={roundList}
+                isLoading={isRoundListLoading}
+                isError={isRoundListError}
+                isStarting={getGame.isLoading}
+                hasStartError={getGame.isError}
+                selectedRound={selectRound}
+                onSelectRound={handleRoundSelect}
+                onRetry={() => refetchRoundList()}
+            />
+        );
     }
 
     if (isLoding) {
