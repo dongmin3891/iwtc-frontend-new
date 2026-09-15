@@ -11,12 +11,12 @@ interface GameCandidateMediaProps {
 const GameCandidateMedia = ({ content }: GameCandidateMediaProps) => {
     if (content.fileType === 'INTERNET_VIDEO_URL') {
         return (
-            <div className="flex items-center justify-center h-full">
+            <div className="h-full w-full bg-black [&>div]:h-full [&_iframe]:h-full [&_iframe]:w-full">
                 <CustomYoutubePlayer
                     videoUrl={content.imgUrl}
                     time={content.internetMovieStartPlayTime}
-                    width={'750'}
-                    height={'500'}
+                    width="100%"
+                    height="100%"
                     playDuration={content.videoPlayDuration}
                 />
             </div>
@@ -25,18 +25,19 @@ const GameCandidateMedia = ({ content }: GameCandidateMediaProps) => {
 
     if (isMP4(content.imgUrl)) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <video src={content.imgUrl} width={'700'} height={'300'} autoPlay muted loop />
+            <div className="h-full w-full bg-black">
+                <video className="h-full w-full object-cover" src={content.imgUrl} autoPlay muted loop playsInline />
             </div>
         );
     }
 
     return (
         <Image
-            className="h-full w-full"
+            className="object-cover transition duration-500 group-hover:scale-[1.03]"
             src={content.imgUrl}
-            width={'750'}
-            height={'500'}
+            fill
+            priority
+            sizes="(max-width: 767px) 100vw, 50vw"
             alt={content.name}
         />
     );

@@ -6,7 +6,6 @@ import { useMutation } from '@tanstack/react-query';
 import { mappingMediaFile } from '@/utils/common';
 import { useRouter } from 'next/navigation';
 import { animated } from '@react-spring/web';
-import Spiner from '@/components/common/Spiner';
 import {
     createGameClearPath,
     createWorldCupGameRequest,
@@ -146,91 +145,148 @@ const Page = ({ params }: { params: { id: string } }) => {
     }
 
     if (isLoding) {
-        return <Spiner />;
+        return (
+            <main className="grid min-h-[calc(100vh-72px)] place-items-center bg-slate-950 px-5 text-white">
+                <div className="text-center" role="status">
+                    <span className="mx-auto block h-11 w-11 animate-spin rounded-full border-4 border-white/15 border-t-violet-400" />
+                    <p className="mt-5 text-sm font-bold text-slate-300">첫 번째 대결을 준비하고 있어요.</p>
+                </div>
+            </main>
+        );
     }
 
     if (gameList.length > 0) {
         const leftGame = gameList[0];
         const rightGame = gameList[1];
+        const currentRoundLabel = selectRound === 2 ? '결승' : `${selectRound}강`;
+        const remainingMatches = Math.ceil(gameList.length / 2);
+        const visibleProgress = Math.min(progressPercentage, 100);
+        const isSelectionLocked = isSwapping || getGame.isLoading;
+        const gameStatusLabel = getGame.isLoading
+            ? '다음 대결 준비 중'
+            : isSwapping
+              ? '선택 반영 중'
+              : '선택 대기 중';
+
         return (
-            <>
-                <div className="grid h-full flex  place-items-center box-border" style={{ height: '1000px' }}>
-                    <div style={{ height: '15px' }} />
-                    <h1 className="text-white text-2xl font-black">🔥 {roundList?.data?.worldCupTitle} 🔥</h1>
-                    <h1 className="text-white text-2xl font-black">
-                        {selectRound === 2 ? '결승' : selectRound + '강'}
-                    </h1>
-                    <div className="w-1/2 bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 relative ">
-                        <div
-                            className={`bg-blue-600 h-2.5 rounded-full absolute left-0 transition-width transition-all duration-700 ease-in-out`}
-                            style={{ width: `${progressPercentage}%` }}
-                        ></div>
-                        {Object.entries(roundLabels).map(([label, position]) => (
-                            <div
-                                key={label}
-                                className={`absolute ${
-                                    Math.round(position) === Math.round(progressPercentage)
-                                        ? 'text-blue text-1xl text-orange-500 font-bold'
-                                        : 'text-white'
-                                } flex`}
-                                style={{
-                                    left: `${position === 100 ? 96 : position}%`,
-                                    transform: `translateX(${position === 100 ? `50` : '-50'}%)`,
-                                }}
-                            >
-                                {label}
+            <main className="relative isolate min-h-[calc(100vh-72px)] overflow-hidden bg-slate-950 px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
+                <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_10%_15%,rgba(124,110,255,0.3),transparent_26%),radial-gradient(circle_at_88%_72%,rgba(14,165,233,0.16),transparent_28%)]" />
+                <div className="absolute inset-0 -z-10 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.3)_1px,transparent_1px)] [background-size:48px_48px]" />
+
+                <div className="mx-auto max-w-7xl">
+                    <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <span className="rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1 text-xs font-black tracking-[0.14em] text-violet-200">
+                                    {currentRoundLabel}
+                                </span>
+                                <span className="text-xs font-semibold text-slate-400">
+                                    이번 라운드 남은 대결 {remainingMatches}
+                                </span>
                             </div>
-                        ))}
-                    </div>
-                    <div
-                        className="absolute left-0 transform -translate-x-1/2 -translate-y-1/2"
-                        style={{ left: `${progressPercentage}%`, top: '50%' }}
-                    >
-                        {`4강`}
-                    </div>
-                    <div className="relative flex p-4 text-black shadow " style={{ width: '1600px', height: '800px' }}>
-                        <animated.div
-                            className={'flex items-start mx-auto left-0 right-0 w-full'}
-                            style={{
-                                ...leftStyle,
-                            }}
+                            <h1 className="mt-3 text-2xl font-black tracking-[-0.035em] sm:text-3xl">
+                                {roundList?.data?.worldCupTitle}
+                            </h1>
+                            <p className="mt-2 text-sm text-slate-400">더 마음이 가는 후보를 선택하세요.</p>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                            {gameStatusLabel}
+                        </div>
+                    </header>
+
+                    <section className="mt-8" aria-label={`게임 진행률 ${Math.round(visibleProgress)}%`}>
+                        <div className="relative h-2 overflow-hidden rounded-full bg-white/10">
+                            <div
+                                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-violet-500 to-sky-400 transition-all duration-700 ease-out"
+                                style={{ width: `${visibleProgress}%` }}
+                            />
+                        </div>
+                        <div className="relative mt-3 h-5">
+                            {Object.entries(roundLabels).map(([label, position]) => (
+                                <span
+                                    key={label}
+                                    className={`absolute whitespace-nowrap text-[11px] font-bold transition-colors ${
+                                        visibleProgress >= position ? 'text-violet-200' : 'text-slate-600'
+                                    }`}
+                                    style={{
+                                        left: `${position}%`,
+                                        transform:
+                                            position === 0
+                                                ? 'none'
+                                                : position === 100
+                                                  ? 'translateX(-100%)'
+                                                  : 'translateX(-50%)',
+                                    }}
+                                >
+                                    {label}
+                                </span>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="relative mt-8 grid gap-8 md:grid-cols-2 md:gap-5" aria-label="후보 선택">
+                        <animated.button
+                            type="button"
+                            className="group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-slate-900 text-left shadow-2xl shadow-black/30 transition hover:-translate-y-1 hover:border-violet-300/50 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0"
+                            style={{ ...leftStyle }}
                             onClick={() => handleSelection(0)}
+                            disabled={isSelectionLocked}
+                            aria-label={`${leftGame.name} 선택`}
                         >
                             <GameCandidateMedia content={leftGame} />
-                            <div className="absolute bottom-10 left-10">
-                                <div className="bg-white text-6xl font-bold text-black px-3 py-3 rounded-md">
+                            <span className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/5 to-transparent" />
+                            <span className="absolute inset-x-0 bottom-0 z-10 p-5 sm:p-7">
+                                <span className="text-[11px] font-black tracking-[0.16em] text-violet-200">CANDIDATE A</span>
+                                <span className="mt-2 block text-2xl font-black tracking-[-0.025em] sm:text-3xl">
                                     {leftGame.name}
-                                </div>
-                            </div>
-                        </animated.div>
-                        <div className="flex items-center justify-center">
-                            <div className="absolute">
-                                <div className="flex items-center justify-center h-screen">
-                                    <div className="relative">
-                                        <div className="px-6 py-6 bg-red-500 text-white font-extrabold text-4xl rounded-lg shadow-lg animate-bounce">
-                                            VS
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <animated.div
-                            className={'flex items-end mx-auto left-0 right-0 w-full'}
-                            style={{
-                                ...rightStyle,
-                            }}
+                                </span>
+                                <span className="mt-2 flex items-center gap-2 text-xs font-semibold text-slate-300 opacity-80 transition group-hover:opacity-100">
+                                    이 후보 선택하기 <span aria-hidden="true">→</span>
+                                </span>
+                            </span>
+                        </animated.button>
+
+                        <span className="pointer-events-none absolute left-1/2 top-1/2 z-30 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-slate-950 bg-white text-sm font-black italic text-slate-950 shadow-2xl">
+                            VS
+                        </span>
+
+                        <animated.button
+                            type="button"
+                            className="group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-slate-900 text-left shadow-2xl shadow-black/30 transition hover:-translate-y-1 hover:border-sky-300/50 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0"
+                            style={{ ...rightStyle }}
                             onClick={() => handleSelection(1)}
+                            disabled={isSelectionLocked}
+                            aria-label={`${rightGame.name} 선택`}
                         >
                             <GameCandidateMedia content={rightGame} />
-                            <div className="absolute bottom-10 right-10">
-                                <div className="bg-white text-6xl font-bold text-black px-3 py-3 rounded-md">
+                            <span className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/5 to-transparent" />
+                            <span className="absolute inset-x-0 bottom-0 z-10 p-5 text-right sm:p-7">
+                                <span className="text-[11px] font-black tracking-[0.16em] text-sky-200">CANDIDATE B</span>
+                                <span className="mt-2 block text-2xl font-black tracking-[-0.025em] sm:text-3xl">
                                     {rightGame.name}
+                                </span>
+                                <span className="mt-2 flex items-center justify-end gap-2 text-xs font-semibold text-slate-300 opacity-80 transition group-hover:opacity-100">
+                                    <span aria-hidden="true">←</span> 이 후보 선택하기
+                                </span>
+                            </span>
+                        </animated.button>
+
+                        {getGame.isLoading && (
+                            <div className="absolute inset-0 z-40 grid place-items-center rounded-[28px] bg-slate-950/70 backdrop-blur-sm">
+                                <div className="text-center" role="status">
+                                    <span className="mx-auto block h-10 w-10 animate-spin rounded-full border-4 border-white/20 border-t-violet-300" />
+                                    <p className="mt-4 text-sm font-bold">다음 대결을 준비하고 있어요.</p>
                                 </div>
                             </div>
-                        </animated.div>
-                    </div>
+                        )}
+                    </section>
+
+                    <p className="mt-6 text-center text-xs font-semibold text-slate-500">
+                        선택한 후보는 다음 라운드로 진출합니다.
+                    </p>
                 </div>
-            </>
+            </main>
         );
     }
 };
