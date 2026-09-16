@@ -5,53 +5,72 @@ interface IProps {
     mediaPath: string;
     videoStartTime: string;
     videoPlayDuration: string;
-    handleCreateWorldCupContents: (e: ChangeEvent<HTMLInputElement>) => void;
+    handleCreateWorldCupContents: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const YoutubeTypeLayout = ({ mediaPath, videoStartTime, videoPlayDuration, handleCreateWorldCupContents }: IProps) => {
     return (
-        <div className="mb-2">
-            <strong className="ml-1">동영상 링크</strong>
+        <div className="space-y-5">
             <div>
-                <div className="flex">
-                    <input
-                        id="videoLinkInput"
-                        type="text"
-                        className=" w-full h-10 p-1 border rounded-xl"
-                        name="mediaPath"
-                        value={mediaPath}
-                        placeholder="유튜브 동영상 링크"
-                        onChange={handleCreateWorldCupContents}
-                    />
+                <div className="mb-2 flex items-center justify-between gap-3">
+                    <label htmlFor="candidate-video-url" className="text-xs font-bold text-slate-300">
+                        YouTube 영상 주소
+                    </label>
+                    <span className="text-[11px] font-semibold text-slate-600">HTTPS watch URL</span>
                 </div>
+                <input
+                    id="candidate-video-url"
+                    type="url"
+                    className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-violet-300/50 focus:ring-4 focus:ring-violet-400/10"
+                    name="mediaPath"
+                    value={mediaPath}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    onChange={handleCreateWorldCupContents}
+                />
+                <p className="mt-2 text-[11px] leading-4 text-slate-600">YouTube의 영상 페이지 주소를 그대로 붙여 넣으세요.</p>
             </div>
-            <div className="flex">
-                <div className="mr-2">
-                    <div className="ml-1">영상 시작 시간</div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label htmlFor="candidate-video-start" className="mb-2 block text-xs font-bold text-slate-300">
+                        시작 시간
+                    </label>
                     <input
+                        id="candidate-video-start"
                         type="text"
-                        className="p-1 border rounded-xl"
+                        inputMode="numeric"
+                        className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-violet-300/50 focus:ring-4 focus:ring-violet-400/10"
                         name="videoStartTime"
                         value={videoStartTime}
                         onChange={handleCreateWorldCupContents}
-                        placeholder="형식 : 00000"
+                        placeholder="00030"
                     />
+                    <p className="mt-2 text-[11px] leading-4 text-slate-600">5자리 분·초 형식 · 예: 10분 1초 → 01001</p>
                 </div>
                 <div>
-                    <div className="ml-1">반복 시간</div>
+                    <label htmlFor="candidate-video-duration" className="mb-2 block text-xs font-bold text-slate-300">
+                        반복 시간
+                    </label>
                     <input
-                        type="text"
-                        className="p-1 border rounded-xl"
+                        id="candidate-video-duration"
+                        type="number"
+                        min={3}
+                        max={5}
+                        inputMode="numeric"
+                        className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-violet-300/50 focus:ring-4 focus:ring-violet-400/10"
                         name="videoPlayDuration"
                         value={videoPlayDuration}
                         onChange={handleCreateWorldCupContents}
-                        placeholder="3~5초 사이"
+                        placeholder="3"
                     />
+                    <p className="mt-2 text-[11px] leading-4 text-slate-600">3~5초 사이의 정수로 입력하세요.</p>
                 </div>
             </div>
+
             {mediaPath && (
-                <div className="m-5">
-                    <YoutubePlayer url={mediaPath} componentType={'uploadForm'} />
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                    <YoutubePlayer url={mediaPath} componentType="uploadForm" />
+                    <p className="border-t border-white/10 px-4 py-3 text-[11px] font-semibold text-slate-500">입력한 YouTube 영상 미리보기</p>
                 </div>
             )}
         </div>

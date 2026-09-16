@@ -6,29 +6,17 @@ interface IProps {
 }
 
 const YoutubePlayer = ({ url, componentType }: IProps) => {
-    // 플레이어 사용 위치에 따라 플레이어 크기 선택
-    const getPlayerSize = (componentType: IProps['componentType']): [number, number] => {
-        const uploadComponentWidth = 560;
-        const uploadComponentHeight = 315;
-
-        const uploadListComponentWidth = 400;
-        const uploadListComponentHeight = 200;
-
-        if (componentType === 'uploadForm') {
-            return [uploadComponentWidth, uploadComponentHeight];
-        }
-
-        return [uploadListComponentWidth, uploadListComponentHeight];
-    };
-
     const videoId = getYoutubeVideoId(url || '');
-
     const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    const [width, height] = getPlayerSize(componentType);
 
     return (
-        <div>
-            <iframe width={width} height={height} src={embedUrl} title="YouTube Video Player" allowFullScreen></iframe>
+        <div className={componentType === 'uploadForm' ? 'aspect-video w-full' : 'aspect-video w-full max-w-[400px]'}>
+            <iframe
+                className="h-full w-full"
+                src={embedUrl}
+                title="YouTube 영상 미리보기"
+                allowFullScreen
+            />
         </div>
     );
 };
