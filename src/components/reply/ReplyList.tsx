@@ -44,38 +44,36 @@ const ReplyList = ({ replyData }: IProps) => {
     };
 
     return (
-        <>
-            <article className="bg-zinc-900 border border-zinc-600 p-3 text-base rounded-lg dark:bg-gray-900">
-                <footer className="flex justify-between items-center mb-2">
-                    <div className="flex items-center">
-                        <p className="inline-flex items-center mr-3 text-sm font-semibold">
-                            <span className="text-yellow-400">{writerNickname}</span>
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            <time
-                                dateTime={createdAt}
-                                title={moment(createdAt).format('YYYY-MM-DD HH:mm:ss')}
-                            >
+        <article className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+            <footer className="mb-2 flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-violet-400/15 text-xs font-black text-violet-200">
+                        {writerNickname.slice(0, 1).toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-slate-200">{writerNickname}</p>
+                        <p className="text-[11px] text-slate-500">
+                            <time dateTime={createdAt} title={moment(createdAt).format('YYYY-MM-DD HH:mm:ss')}>
                                 {getPassedTimeMessage(moment(createdAt))}
                             </time>
                         </p>
                     </div>
-                    {showDeleteButton && (
-                        <button
-                            type="button"
-                            className="text-sm text-gray-400 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
-                            onClick={onClickDelete}
-                            disabled={isDeleting}
-                            aria-label={`${writerNickname} 댓글 삭제`}
-                        >
-                            {isDeleting ? '삭제 중...' : '삭제'}
-                        </button>
-                    )}
-                </footer>
+                </div>
+                {showDeleteButton && (
+                    <button
+                        type="button"
+                        className="shrink-0 text-xs font-semibold text-slate-500 transition hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={onClickDelete}
+                        disabled={isDeleting}
+                        aria-label={`${writerNickname} 댓글 삭제`}
+                    >
+                        {isDeleting ? '삭제 중' : '삭제'}
+                    </button>
+                )}
+            </footer>
 
-                <p className="text-white dark:text-gray-400">{body}</p>
-            </article>
-        </>
+            <p className="whitespace-pre-wrap break-words text-sm leading-6 text-slate-300">{body}</p>
+        </article>
     );
 };
 
