@@ -1,11 +1,12 @@
 'use client';
+
+import React, { ChangeEvent, FormEvent, useContext, useEffect, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { createWorldCup, ManagedWorldCupSummary } from '@/services/ManageWorldCupService';
 import { getAccessToken } from '@/utils/TokenManager';
-import { useMutation } from '@tanstack/react-query';
-import React, { ChangeEvent, MouseEvent, useContext, useEffect, useState } from 'react';
-import AlertPopup from '../popup/AlertPopup';
 import { PopupContext } from '@/providers/PopupProvider';
-import { isAxiosError } from 'axios';
+import AlertPopup from '../popup/AlertPopup';
 
 interface IProps {
     setIsCreateWorldCup: (isCreated: boolean) => void;
@@ -18,11 +19,9 @@ interface ManageWorldCupErrorResponse {
     errorCode: number;
     message: string;
 }
-/**
- * 게임 관리 폼에서 월드컵 게임에 관한 내용을 표현하는 폼
- * @param params - 월드컵 게임수정 버튼으로 들어오면 기존 월드컵의 내용이 들어온다.
- * @returns 월드컵 게임 수정 컴포넌트
- */
+
+type FieldErrors = Partial<Record<'title' | 'description' | 'visibleType', string>>;
+
 const WorldCupManageForm = ({
     setIsCreateWorldCup,
     setWorldCupId,
@@ -30,37 +29,25 @@ const WorldCupManageForm = ({
     isCreateWorldCup,
 }: IProps) => {
     const { showPopup, hidePopup } = useContext(PopupContext);
-
-    const [worldCupInfo, setWorldCuptInfo] = useState({
-        title: myWorldCupData ? myWorldCupData.title : '',
-        description: myWorldCupData ? myWorldCupData.description : '',
-        visibleType: myWorldCupData ? myWorldCupData.visibleType : '',
+    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+    const [worldCupInfo, setWorldCupInfo] = useState({
+        title: myWorldCupData?.title ?? '',
+        description: myWorldCupData?.description ?? '',
+        visibleType: myWorldCupData?.visibleType ?? 'PUBLIC',
     });
 
     useEffect(() => {
-        setWorldCuptInfo((prevWorldCup) => ({
-            ...prevWorldCup,
-            visibleType: prevWorldCup.visibleType || 'PUBLIC',
-        }));
-    }, []);
-
-    useEffect(() => {
         if (myWorldCupData) {
-            setWorldCuptInfo((prevWorldCup) => ({
-                ...prevWorldCup,
+            setWorldCupInfo({
                 title: myWorldCupData.title,
                 description: myWorldCupData.description,
                 visibleType: myWorldCupData.visibleType,
-            }));
+            });
         }
     }, [myWorldCupData]);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setWorldCuptInfo((prevWorldCup) => ({
-            ...prevWorldCup,
-            [name]: value,
-        }));
+    const showAlertPopup = (message: string) => {
+        showPopup(<AlertPopup message={message} hidePopup={hidePopup} />);
     };
 
     const createGame = useMutation(createWorldCup, {
@@ -68,134 +55,208 @@ const WorldCupManageForm = ({
             setWorldCupId(data.data);
             setIsCreateWorldCup(true);
         },
-
         onError: (error: unknown) => {
-            if (isAxiosError<ManageWorldCupErrorResponse>(error) && error.response?.data.errorCode) {
-                const { message } = error.response.data;
-                showAlertPopup(message);
+            if (isAxiosError<ManageWorldCupErrorResponse>(error) && error.response?.data.message) {
+                showAlertPopup(error.response.data.message);
+                return;
             }
+            showAlertPopup('월드컵을 만드는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         },
     });
 
-    const showAlertPopup = (maeeage: string) => {
-        showPopup(<AlertPopup message={maeeage} hidePopup={hidePopup} />);
+    const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target;
+        setWorldCupInfo((current) => ({
+            ...current,
+            [name]: value,
+        }));
+        setFieldErrors((current) => ({
+            ...current,
+            [name]: undefined,
+        }));
     };
 
-    const handleCreateWorldCup = (e: MouseEvent<HTMLButtonElement>) => {
-        const { title, description, visibleType } = worldCupInfo;
-        if (description.length > 100 || description === '') {
-            showAlertPopup('월드컵 설명 1자 이상 100자 이하입니다.');
-            throw Error();
+    const validate = () => {
+        const nextErrors: FieldErrors = {};
+        const title = worldCupInfo.title.trim();
+        const description = worldCupInfo.description.trim();
+
+        if (!title) {
+            nextErrors.title = '월드컵 제목을 입력해주세요.';
+        }
+        if (!description || description.length > 100) {
+            nextErrors.description = '설명은 1자 이상 100자 이하로 입력해주세요.';
+        }
+        if (!['PUBLIC', 'PRIVATE'].includes(worldCupInfo.visibleType)) {
+            nextErrors.visibleType = '공개 여부를 선택해주세요.';
         }
 
-        if (title === '') {
-            showAlertPopup('제목을 입력해주세요.');
-            throw Error();
+        setFieldErrors(nextErrors);
+        return Object.keys(nextErrors).length === 0;
+    };
+
+    const handleCreateWorldCup = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!validate() || createGame.isLoading || isCreateWorldCup) {
+            return;
         }
 
-        if (!(visibleType === 'PUBLIC' || visibleType === 'PRIVATE')) {
-            showAlertPopup('노출 여부 선택해주세요.');
-            throw Error();
-        }
-
-        const token = getAccessToken();
-
-        const newWorldCup = {
-            title,
-            description,
-            visibleType,
-            token,
-        };
-
-        e.preventDefault();
-
-        createGame.mutate(newWorldCup);
+        createGame.mutate({
+            title: worldCupInfo.title.trim(),
+            description: worldCupInfo.description.trim(),
+            visibleType: worldCupInfo.visibleType,
+            token: getAccessToken(),
+        });
     };
 
-    const disabledUpdateButton = () => {
-        return (
-            <div className="flex justify-end">
-                <button className="bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    새로운 월드컵 반영 완료
-                </button>
-            </div>
-        );
-    };
-
-    const enableUpdateButton = () => {
-        return (
-            <div className="flex justify-end">
-                <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    onClick={handleCreateWorldCup}
-                >
-                    월드컵 생성/수정
-                </button>
-            </div>
-        );
-    };
+    const isDisabled = createGame.isLoading || isCreateWorldCup;
 
     return (
-        <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-            <div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
-                        월드컵 제목
-                    </label>
+        <section className="rounded-[28px] border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+                <div>
+                    <span className="text-[11px] font-black tracking-[0.16em] text-violet-200">STEP 01</span>
+                    <h2 className="mt-2 text-xl font-black tracking-[-0.03em] text-white">월드컵 기본 정보</h2>
+                    <p className="mt-2 text-xs leading-5 text-slate-400">후보를 추가하기 전에 게임의 주제와 공개 범위를 정해주세요.</p>
+                </div>
+                <span
+                    className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold ${
+                        isCreateWorldCup
+                            ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-200'
+                            : 'border-white/10 bg-white/[0.05] text-slate-400'
+                    }`}
+                >
+                    {isCreateWorldCup ? '저장 완료' : '작성 중'}
+                </span>
+            </div>
+
+            <form className="mt-7 space-y-6" onSubmit={handleCreateWorldCup} noValidate>
+                <div>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                        <label className="text-xs font-bold text-slate-300" htmlFor="title">
+                            월드컵 제목
+                        </label>
+                        <span className="text-[11px] font-semibold text-slate-600">필수</span>
+                    </div>
                     <input
                         type="text"
                         id="title"
                         name="title"
                         value={worldCupInfo.title}
                         onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        disabled={isDisabled}
+                        placeholder="예: 최고의 여름 휴가지 월드컵"
+                        aria-invalid={Boolean(fieldErrors.title)}
+                        aria-describedby={fieldErrors.title ? 'title-error' : 'title-help'}
+                        className={`h-12 w-full rounded-2xl border bg-slate-950/45 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 ${
+                            fieldErrors.title
+                                ? 'border-rose-400/60 focus:border-rose-300 focus:ring-rose-400/10'
+                                : 'border-white/10 focus:border-violet-300/50 focus:ring-violet-400/10'
+                        }`}
                     />
+                    {fieldErrors.title ? (
+                        <p id="title-error" className="mt-2 text-xs font-semibold text-rose-300">
+                            {fieldErrors.title}
+                        </p>
+                    ) : (
+                        <p id="title-help" className="mt-2 text-[11px] leading-4 text-slate-600">
+                            무엇을 비교하는 월드컵인지 한눈에 알 수 있게 작성하세요.
+                        </p>
+                    )}
                 </div>
 
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-                        설명
-                    </label>
+                <div>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                        <label className="text-xs font-bold text-slate-300" htmlFor="description">
+                            설명
+                        </label>
+                        <span className="text-[11px] font-semibold text-slate-600">{worldCupInfo.description.length}/100</span>
+                    </div>
                     <textarea
                         id="description"
                         name="description"
                         value={worldCupInfo.description}
                         onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        disabled={isDisabled}
+                        maxLength={100}
+                        rows={4}
+                        placeholder="플레이어가 이해하기 쉽도록 월드컵을 소개해주세요."
+                        aria-invalid={Boolean(fieldErrors.description)}
+                        aria-describedby={fieldErrors.description ? 'description-error' : 'description-help'}
+                        className={`w-full resize-none rounded-2xl border bg-slate-950/45 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-slate-600 focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 ${
+                            fieldErrors.description
+                                ? 'border-rose-400/60 focus:border-rose-300 focus:ring-rose-400/10'
+                                : 'border-white/10 focus:border-violet-300/50 focus:ring-violet-400/10'
+                        }`}
                     />
+                    {fieldErrors.description ? (
+                        <p id="description-error" className="mt-2 text-xs font-semibold text-rose-300">
+                            {fieldErrors.description}
+                        </p>
+                    ) : (
+                        <p id="description-help" className="mt-2 text-[11px] leading-4 text-slate-600">
+                            목록과 게임 시작 화면에 표시되는 소개 문구예요.
+                        </p>
+                    )}
                 </div>
 
-                <div className="mb-4">
-                    <span className="text-gray-700 text-sm font-bold mb-2">공개 여부</span>
-                    <div className="mt-2">
-                        <label className="inline-flex items-center ">
-                            <input
-                                type="radio"
-                                name="visibleType"
-                                value="PUBLIC"
-                                onChange={handleChange}
-                                className="form-radio"
-                                checked={worldCupInfo.visibleType === 'PUBLIC'}
-                            />
-                            <span className="ml-2">공개</span>
-                        </label>
-                        <label className="inline-flex items-center ml-6">
-                            <input
-                                type="radio"
-                                name="visibleType"
-                                value="PRIVATE"
-                                onChange={handleChange}
-                                className="form-radio"
-                                checked={worldCupInfo.visibleType === 'PRIVATE'}
-                            />
-                            <span className="ml-2">비공개</span>
-                        </label>
+                <fieldset disabled={isDisabled}>
+                    <legend className="text-xs font-bold text-slate-300">공개 여부</legend>
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                        {[
+                            { value: 'PUBLIC', label: '공개', description: '누구나 찾아서 플레이' },
+                            { value: 'PRIVATE', label: '비공개', description: '목록에 노출하지 않음' },
+                        ].map((option) => {
+                            const isSelected = worldCupInfo.visibleType === option.value;
+                            return (
+                                <label
+                                    key={option.value}
+                                    className={`cursor-pointer rounded-2xl border p-4 transition ${
+                                        isSelected
+                                            ? 'border-violet-300/45 bg-violet-400/10 ring-4 ring-violet-400/[0.06]'
+                                            : 'border-white/10 bg-slate-950/30 hover:border-white/20'
+                                    } ${isDisabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <input
+                                            type="radio"
+                                            name="visibleType"
+                                            value={option.value}
+                                            onChange={handleChange}
+                                            checked={isSelected}
+                                            className="h-4 w-4 accent-violet-500"
+                                        />
+                                        <span className="text-sm font-bold text-white">{option.label}</span>
+                                    </span>
+                                    <span className="mt-2 block pl-6 text-[11px] leading-4 text-slate-500">{option.description}</span>
+                                </label>
+                            );
+                        })}
                     </div>
-                </div>
+                    {fieldErrors.visibleType && (
+                        <p className="mt-2 text-xs font-semibold text-rose-300">{fieldErrors.visibleType}</p>
+                    )}
+                </fieldset>
 
-                {!isCreateWorldCup ? enableUpdateButton() : disabledUpdateButton()}
-            </div>
-        </div>
+                {isCreateWorldCup ? (
+                    <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-3" role="status">
+                        <p className="text-sm font-bold text-emerald-200">기본 정보를 저장했어요.</p>
+                        <p className="mt-1 text-xs leading-5 text-emerald-100/60">이제 오른쪽에서 후보를 추가할 수 있습니다.</p>
+                    </div>
+                ) : (
+                    <button
+                        type="submit"
+                        disabled={createGame.isLoading}
+                        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-violet-500 px-5 text-sm font-black text-white shadow-lg shadow-violet-950/30 transition hover:-translate-y-0.5 hover:bg-violet-400 disabled:cursor-wait disabled:opacity-60"
+                    >
+                        {createGame.isLoading && (
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        )}
+                        {createGame.isLoading ? '월드컵 만드는 중' : '기본 정보 저장하고 후보 추가하기'}
+                    </button>
+                )}
+            </form>
+        </section>
     );
 };
 
