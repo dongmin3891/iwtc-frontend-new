@@ -55,44 +55,39 @@ const StaticMediaFileTypeCard = ({
 }: IProps) => {
     const [mediaData, setMediaData] = useState<StaticMediaContentState>(() => createStaticMediaContentState(contents));
     const [isUpdateMode, setIsUpdateMode] = useState(false);
+
     useEffect(() => {
         setMediaData(createStaticMediaContentState(contents));
     }, [contents]);
 
-    const handleMediaData = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-
-        setMediaData((prevData) => ({
-            ...prevData,
+    const handleMediaData = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = event.target;
+        setMediaData((current) => ({
+            ...current,
             [name]: value,
         }));
     };
 
-    // 해당 요소 삭제
-    const removeContents = async () => {
+    const removeContents = () => {
         const deleteResult: { content?: ManagedContent } = {};
 
-        setWorldCupContentsList((prev) => {
-            // 먼저 삭제할 컨텐츠를 식별합니다.
-            const foundContent = prev.find((contents) => contents.id === index);
+        setWorldCupContentsList((current) => {
+            const foundContent = current.find((item) => item.id === index);
             if (foundContent) {
                 deleteResult.content = { ...foundContent };
             }
 
-            // 삭제할 컨텐츠를 제외하고 리스트를 반환합니다.
-            return prev
-                .filter((contents) => contents.id !== index)
-                .map((contents, newIndex) => ({ ...contents, id: newIndex }));
+            return current
+                .filter((item) => item.id !== index)
+                .map((item, newIndex) => ({ ...item, id: newIndex }));
         });
         const deleteContent = deleteResult.content;
 
         if (deleteContent && setNewList && setDeleteList) {
-            // newList에서 deleteContent와 일치하는 항목을 제외하고 새로운 배열을 생성합니다.
-            //새롭게 추가된 컨텐츠는 deleteList에 넣으면 안된다. 네임과 미디어패스로 구분 이후 수정할 때 newList도 수정해줘야함
             if (!hasPersistedContentId(deleteContent)) {
                 if (newList.length > 0) {
-                    setNewList((prev) =>
-                        prev.filter(
+                    setNewList((current) =>
+                        current.filter(
                             (item) =>
                                 item.contentsName !== deleteContent.contentsName &&
                                 item.mediaPath !== deleteContent.mediaPath
@@ -100,69 +95,60 @@ const StaticMediaFileTypeCard = ({
                     );
                 }
             } else {
-                setDeleteList((prev) => [...prev, deleteContent]);
+                setDeleteList((current) => [...current, deleteContent]);
             }
         }
     };
 
-    const updateContentsMode = () => {
-        setIsUpdateMode(true);
-    };
-
-    const applyUpdateContents = async () => {
+    const applyUpdateContents = () => {
         const updateResult: { content?: ManagedContent } = {};
 
-        setWorldCupContentsList((prev) =>
-            prev.map((contents) => {
-                if (contents.id === index) {
-                    // 수정 조건을 만족하는 경우, 수정된 컨텐츠 정보를 저장
-                    if (
-                        contents.contentsName !== mediaData.contentsName ||
-                        contents.mediaData !== mediaData.mediaData ||
-                        contents.visibleType !== mediaData.visibleType
-                    ) {
-                        const modifiedContent = {
-                            ...contents,
-                            contentsName: mediaData.contentsName,
-                            mediaData: mediaData.mediaData,
-                            imgType: mediaData.mediaData,
-                            originalName: mediaData.originalName,
-                            visibleType: mediaData.visibleType,
-                            detailFileType: mediaData.detailFileType,
-                            uploadFile: mediaData.uploadFile,
-                        };
-                        updateResult.content = modifiedContent;
-
-                        return modifiedContent;
-                    }
+        setWorldCupContentsList((current) =>
+            current.map((item) => {
+                if (
+                    item.id === index &&
+                    (item.contentsName !== mediaData.contentsName ||
+                        item.mediaData !== mediaData.mediaData ||
+                        item.visibleType !== mediaData.visibleType)
+                ) {
+                    const modifiedContent = {
+                        ...item,
+                        contentsName: mediaData.contentsName,
+                        mediaData: mediaData.mediaData,
+                        imgType: mediaData.mediaData,
+                        originalName: mediaData.originalName,
+                        visibleType: mediaData.visibleType,
+                        detailFileType: mediaData.detailFileType,
+                        uploadFile: mediaData.uploadFile,
+                    };
+                    updateResult.content = modifiedContent;
+                    return modifiedContent;
                 }
-                return contents;
+                return item;
             })
         );
         const modifiedContent = updateResult.content;
 
         if (modifiedContent && setNewList && setModifyList) {
-            //새로 추가된 컨텐츠
             if (!hasPersistedContentId(modifiedContent)) {
                 if (newList.length) {
-                    setNewList((prevList) =>
-                        prevList.map((item) =>
+                    setNewList((current) =>
+                        current.map((item) =>
                             item.absoluteName === modifiedContent.absoluteName ? modifiedContent : item
                         )
                     );
                 }
             } else {
-                setModifyList((prev) => {
-                    // 수정하려는 컨텐츠의 오리지널 네임을 찾음. 없으면 -1을 반환합니다.
-                    const existingIndex = prev.findIndex((item) => item.contentsId === modifiedContent.contentsId);
-
+                setModifyList((current) => {
+                    const existingIndex = current.findIndex(
+                        (item) => item.contentsId === modifiedContent.contentsId
+                    );
                     if (existingIndex !== -1) {
-                        // 일치하는 항목이 있으면, 그 항목을 업데이트합니다.
-                        return prev.map((item, index) => (index === existingIndex ? modifiedContent : item));
-                    } else {
-                        // 일치하는 항목이 없으면, 새 항목을 배열에 추가합니다.
-                        return [...prev, modifiedContent];
+                        return current.map((item, itemIndex) =>
+                            itemIndex === existingIndex ? modifiedContent : item
+                        );
                     }
+                    return [...current, modifiedContent];
                 });
             }
         }
@@ -170,166 +156,169 @@ const StaticMediaFileTypeCard = ({
         setIsUpdateMode(false);
     };
 
-    const changeImage = (e: ChangeEvent<HTMLInputElement>) => {
-        const imageFile = e.target.files?.[0];
-        if (!imageFile) {
-            return;
-        }
+    const cancelUpdateContents = () => {
+        setMediaData(createStaticMediaContentState(contents));
+        setIsUpdateMode(false);
+    };
+
+    const changeImage = (event: ChangeEvent<HTMLInputElement>) => {
+        const imageFile = event.target.files?.[0];
+        if (!imageFile) return;
 
         const reader = new FileReader();
-        reader.addEventListener('load', (e: ProgressEvent<FileReader>) => {
-            const mediaData = e.target?.result;
-            if (typeof mediaData !== 'string') {
-                return;
-            }
+        reader.addEventListener('load', (loadEvent: ProgressEvent<FileReader>) => {
+            const nextMediaData = loadEvent.target?.result;
+            if (typeof nextMediaData !== 'string') return;
 
-            setMediaData((prevData) => ({
-                ...prevData,
-                mediaData,
-                imgType: mediaData,
+            setMediaData((current) => ({
+                ...current,
+                mediaData: nextMediaData,
+                imgType: nextMediaData,
             }));
         });
-
         reader.readAsDataURL(imageFile);
 
-        setMediaData((prevData) => ({
-            ...prevData,
+        setMediaData((current) => ({
+            ...current,
             originalName: imageFile.name,
             detailFileType: imageFile.type.replace('image/', '').toUpperCase(),
             uploadFile: imageFile,
         }));
     };
 
-    return (
-        <div>
-            <div key={index} className="mb-4 p-4 border rounded-xl shadow-sm">
-                <div className="flex justify-between">
-                    <div className="flex min-w-0 gap-x-4">
-                        <div className="flex min-w-0 gap-x-4">
-                            {mediaData.mp4Type && (
-                                <video
-                                    src={mediaData.mediaData}
-                                    width={'auto'}
-                                    height={100}
-                                    autoPlay
-                                    muted
-                                    loop
-                                ></video>
-                            )}
-                            {mediaData.imgType && (
-                                <img
-                                    className="w-full h-52"
-                                    src={mediaData.mediaData}
-                                    width={10}
-                                    height={10}
-                                    alt="img"
-                                />
-                            )}
-                        </div>
-                        <div>
-                            <div className="flex-1 min-w-0">
-                                <div className="mb-2">
-                                    <strong>컨텐츠 이름:</strong>
-                                    <span className="ml-2">
-                                        {!isUpdateMode ? (
-                                            <span>{mediaData.contentsName}</span>
-                                        ) : (
-                                            <span>
-                                                <input
-                                                    id="textInput"
-                                                    type="text"
-                                                    className="p-1 border rounded-xl"
-                                                    placeholder="컨텐츠 이름"
-                                                    name="contentsName"
-                                                    onChange={handleMediaData}
-                                                    value={mediaData.contentsName}
-                                                />
-                                            </span>
-                                        )}
-                                    </span>
-                                </div>
+    const inputClassName =
+        'h-11 w-full rounded-xl border border-white/10 bg-slate-950/55 px-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-violet-300/50 focus:ring-4 focus:ring-violet-400/10';
 
-                                <div className="mb-2 flex">
-                                    <div>
-                                        <strong>공개 여부:</strong>
-                                    </div>
-                                    <span className="ml-2">
-                                        {!isUpdateMode ? (
-                                            <div>{mediaData.visibleType === 'PUBLIC' ? '공개' : '비공개'}</div>
-                                        ) : (
-                                            <div>
-                                                <select
-                                                    name="visibleType"
-                                                    value={mediaData.visibleType}
-                                                    onChange={handleMediaData}
-                                                    className="p-1 border rounded-xl"
-                                                >
-                                                    <option value="PUBLIC">공개</option>
-                                                    <option value="PRIVATE">비공개</option>
-                                                </select>
-                                            </div>
-                                        )}
-                                    </span>
+    return (
+        <article className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-lg shadow-black/10">
+            <div className="grid gap-0 md:grid-cols-[240px_minmax(0,1fr)]">
+                <div className="relative flex min-h-[190px] items-center justify-center overflow-hidden bg-black/35 md:min-h-full">
+                    {mediaData.mp4Type ? (
+                        <video src={mediaData.mediaData} className="h-full min-h-[190px] w-full object-cover" autoPlay muted loop />
+                    ) : mediaData.mediaData ? (
+                        <img
+                            className="h-full min-h-[190px] w-full object-cover"
+                            src={mediaData.mediaData}
+                            alt={`${mediaData.contentsName || '후보'} 이미지`}
+                        />
+                    ) : (
+                        <span className="text-xs font-semibold text-slate-600">미리보기 없음</span>
+                    )}
+                    <span className="absolute left-3 top-3 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1 text-[10px] font-black tracking-[0.12em] text-slate-200 backdrop-blur">
+                        IMAGE
+                    </span>
+                </div>
+
+                <div className="flex min-w-0 flex-col p-5">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-black tracking-[0.14em] text-slate-600">CANDIDATE {String(index + 1).padStart(2, '0')}</p>
+                            {!isUpdateMode ? (
+                                <h4 className="mt-2 truncate text-lg font-black text-white">{mediaData.contentsName}</h4>
+                            ) : (
+                                <div className="mt-3">
+                                    <label htmlFor={`image-candidate-name-${index}`} className="mb-2 block text-xs font-bold text-slate-300">
+                                        후보 이름
+                                    </label>
+                                    <input
+                                        id={`image-candidate-name-${index}`}
+                                        type="text"
+                                        className={inputClassName}
+                                        placeholder="후보 이름"
+                                        name="contentsName"
+                                        onChange={handleMediaData}
+                                        value={mediaData.contentsName}
+                                    />
                                 </div>
-                                <div>
-                                    {isUpdateMode ? (
-                                        <div className="flex">
-                                            <div className="mt-1.5">
-                                                <strong>이미지 변경</strong>
-                                            </div>
-                                            <div className="ml-3">
-                                                <input
-                                                    className="relative m-0 block w-full min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-clip-padding px-3 py-[0.32rem] text-base font-normal text-neutral-700 transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:overflow-hidden file:rounded-none file:border-0 file:border-solid file:border-inherit file:bg-neutral-100 file:px-3 file:py-[0.32rem] file:text-neutral-700 file:transition file:duration-150 file:ease-in-out file:[border-inline-end-width:1px] file:[margin-inline-end:0.75rem] hover:file:bg-neutral-200 focus:border-primary focus:text-neutral-700 focus:shadow-te-primary focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:file:bg-neutral-700 dark:file:text-neutral-100 dark:focus:border-primary"
-                                                    type="file"
-                                                    id="formFileMultiple"
-                                                    name="mediaPath"
-                                                    onChange={changeImage}
-                                                    accept="image/jpeg,image/png,image/gif"
-                                                />
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <></>
-                                    )}
-                                </div>
-                            </div>
+                            )}
                         </div>
+                        <span
+                            className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-bold ${
+                                mediaData.visibleType === 'PUBLIC'
+                                    ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-200'
+                                    : 'border-slate-300/10 bg-slate-400/10 text-slate-400'
+                            }`}
+                        >
+                            {mediaData.visibleType === 'PUBLIC' ? '공개' : '비공개'}
+                        </span>
                     </div>
 
-                    <div className="sm:flex sm:flex-col sm:items-end">
-                        <div>
-                            {!isUpdateMode ? (
-                                <button
-                                    className="bg-green-500 hover:bg-red-700 text-white font-bold my-2 py-2 px-4 rounded"
-                                    onClick={updateContentsMode}
+                    {isUpdateMode && (
+                        <div className="mt-4 space-y-4">
+                            <div>
+                                <label htmlFor={`image-candidate-visible-${index}`} className="mb-2 block text-xs font-bold text-slate-300">
+                                    공개 여부
+                                </label>
+                                <select
+                                    id={`image-candidate-visible-${index}`}
+                                    name="visibleType"
+                                    value={mediaData.visibleType}
+                                    onChange={handleMediaData}
+                                    className={inputClassName}
                                 >
-                                    수정
-                                </button>
-                            ) : (
+                                    <option value="PUBLIC">공개</option>
+                                    <option value="PRIVATE">비공개</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label
+                                    htmlFor={`image-candidate-file-${index}`}
+                                    className="mb-2 block text-xs font-bold text-slate-300"
+                                >
+                                    이미지 변경
+                                </label>
+                                <input
+                                    className="block w-full rounded-xl border border-white/10 bg-slate-950/55 px-3 py-2 text-xs text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-violet-400/15 file:px-3 file:py-2 file:text-xs file:font-bold file:text-violet-200"
+                                    type="file"
+                                    id={`image-candidate-file-${index}`}
+                                    name="mediaPath"
+                                    onChange={changeImage}
+                                    accept="image/jpeg,image/png,image/gif"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-auto flex flex-wrap justify-end gap-2 pt-5">
+                        {isUpdateMode ? (
+                            <>
                                 <button
-                                    className="bg-green-500 hover:bg-red-700 text-white font-bold my-2 py-2 px-4 rounded"
+                                    type="button"
+                                    className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-xs font-bold text-slate-300 transition hover:bg-white/[0.08]"
+                                    onClick={cancelUpdateContents}
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    type="button"
+                                    className="h-10 rounded-xl bg-violet-500 px-4 text-xs font-black text-white transition hover:bg-violet-400"
                                     onClick={applyUpdateContents}
                                 >
-                                    적용
+                                    변경 적용
                                 </button>
-                            )}
-                        </div>
-                        <div>
-                            {!isUpdateMode ? (
+                            </>
+                        ) : (
+                            <>
                                 <button
-                                    className="bg-red-500 hover:bg-red-700 text-white font-bold my-2 py-2 px-4 rounded"
-                                    onClick={() => removeContents()}
+                                    type="button"
+                                    className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-xs font-bold text-slate-300 transition hover:bg-white/[0.08]"
+                                    onClick={() => setIsUpdateMode(true)}
+                                >
+                                    편집
+                                </button>
+                                <button
+                                    type="button"
+                                    className="h-10 rounded-xl border border-rose-300/15 bg-rose-400/10 px-4 text-xs font-bold text-rose-200 transition hover:bg-rose-400/20"
+                                    onClick={removeContents}
                                 >
                                     삭제
                                 </button>
-                            ) : (
-                                <></>
-                            )}
-                        </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
-        </div>
+        </article>
     );
 };
 

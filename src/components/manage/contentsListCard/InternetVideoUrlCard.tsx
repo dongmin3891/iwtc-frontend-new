@@ -52,7 +52,6 @@ const InternetVideoUrlCard = ({
     setNewList,
     newList,
 }: IProps) => {
-    // 유튜브 영상 플레이어에 제공한다.
     const [mediaData, setMediaData] = useState<InternetVideoContentState>(() =>
         createInternetVideoContentState(contents)
     );
@@ -62,55 +61,45 @@ const InternetVideoUrlCard = ({
         setMediaData(createInternetVideoContentState(contents));
     }, [contents]);
 
-    // 해당 요소 삭제
     const removeContents = () => {
         const deleteResult: { content?: ManagedContent } = {};
 
-        setWorldCupContentsList((prev) => {
-            // 먼저 삭제할 컨텐츠를 식별합니다.
-            const foundContent = prev.find((contents) => contents.id === index);
-
+        setWorldCupContentsList((current) => {
+            const foundContent = current.find((item) => item.id === index);
             if (foundContent) {
                 deleteResult.content = { ...foundContent };
             }
 
-            // 삭제할 컨텐츠를 제외하고 리스트를 반환합니다.
-            return prev
-                .filter((contents) => contents.id !== index)
-                .map((contents, newIndex) => ({ ...contents, id: newIndex }));
+            return current
+                .filter((item) => item.id !== index)
+                .map((item, newIndex) => ({ ...item, id: newIndex }));
         });
         const deleteContent = deleteResult.content;
 
         if (deleteContent && setNewList && setDeleteList) {
-            // newList에서 deleteContent와 일치하는 항목을 제외하고 새로운 배열을 생성합니다.
-            //새롭게 추가된 컨텐츠는 deleteList에 넣으면 안된다. 네임과 미디어패스로 구분 이후 수정할 때 newList도 수정해줘야함
             if (!hasPersistedContentId(deleteContent)) {
                 if (newList.length > 0) {
-                    setNewList((prev) => prev.filter((item) => item.absoluteName !== deleteContent.absoluteName));
+                    setNewList((current) =>
+                        current.filter((item) => item.absoluteName !== deleteContent.absoluteName)
+                    );
                 }
             } else {
-                setDeleteList((prev) => [...prev, deleteContent]);
+                setDeleteList((current) => [...current, deleteContent]);
             }
         }
     };
 
-    // 해당 요소 수정
-    const updateContentsMode = () => {
-        setIsUpdateMode(true);
-    };
-
-    const changeVideo = (e: ChangeEvent<HTMLInputElement>) => {
-        setMediaData((prevData) => ({
-            ...prevData,
-            mediaData: e.target.value,
+    const changeVideo = (event: ChangeEvent<HTMLInputElement>) => {
+        setMediaData((current) => ({
+            ...current,
+            mediaData: event.target.value,
         }));
     };
 
-    const handleMediaData = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-
-        setMediaData((prevData) => ({
-            ...prevData,
+    const handleMediaData = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = event.target;
+        setMediaData((current) => ({
+            ...current,
             [name]: value,
         }));
     };
@@ -118,42 +107,40 @@ const InternetVideoUrlCard = ({
     const applyUpdateContents = () => {
         const updateResult: { content?: ManagedContent } = {};
 
-        setWorldCupContentsList((prev) =>
-            prev.map((contents) => {
-                if (contents.id === index) {
-                    const modifiedContent = applyManagedContentEdit(contents, mediaData);
+        setWorldCupContentsList((current) =>
+            current.map((item) => {
+                if (item.id === index) {
+                    const modifiedContent = applyManagedContentEdit(item, mediaData);
                     if (modifiedContent) {
                         updateResult.content = modifiedContent;
                         return modifiedContent;
                     }
                 }
-                return contents;
+                return item;
             })
         );
         const modifiedContent = updateResult.content;
 
         if (modifiedContent && setNewList && setModifyList) {
-            //새로 추가된 컨텐츠
             if (!hasPersistedContentId(modifiedContent)) {
                 if (newList.length) {
-                    setNewList((prevList) =>
-                        prevList.map((item) =>
+                    setNewList((current) =>
+                        current.map((item) =>
                             item.absoluteName === modifiedContent.absoluteName ? modifiedContent : item
                         )
                     );
                 }
             } else {
-                setModifyList((prev) => {
-                    // 수정하려는 컨텐츠의 오리지널 네임을 찾음. 없으면 -1을 반환합니다.
-                    const existingIndex = prev.findIndex((item) => item.mediaFileId === modifiedContent.mediaFileId);
-
+                setModifyList((current) => {
+                    const existingIndex = current.findIndex(
+                        (item) => item.mediaFileId === modifiedContent.mediaFileId
+                    );
                     if (existingIndex !== -1) {
-                        // 일치하는 항목이 있으면, 그 항목을 업데이트합니다.
-                        return prev.map((item, index) => (index === existingIndex ? modifiedContent : item));
-                    } else {
-                        // 일치하는 항목이 없으면, 새 항목을 배열에 추가합니다.
-                        return [...prev, modifiedContent];
+                        return current.map((item, itemIndex) =>
+                            itemIndex === existingIndex ? modifiedContent : item
+                        );
                     }
+                    return [...current, modifiedContent];
                 });
             }
         }
@@ -161,167 +148,184 @@ const InternetVideoUrlCard = ({
         setIsUpdateMode(false);
     };
 
+    const cancelUpdateContents = () => {
+        setMediaData(createInternetVideoContentState(contents));
+        setIsUpdateMode(false);
+    };
+
+    const inputClassName =
+        'h-11 w-full rounded-xl border border-white/10 bg-slate-950/55 px-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-violet-300/50 focus:ring-4 focus:ring-violet-400/10';
+
     return (
-        <div>
-            <div key={index} className="mb-4 p-4 border rounded-xl shadow-sm">
-                <div className="flex justify-between">
-                    <div className="flex min-w-0 gap-x-4">
-                        <div className="flex min-w-0 gap-x-4">
-                            <YoutubePlayer url={mediaData.mediaData} componentType={'uploadList'} />
-                        </div>
+        <article className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-lg shadow-black/10">
+            <div className="grid gap-0 md:grid-cols-[240px_minmax(0,1fr)]">
+                <div className="relative flex min-h-[190px] items-center justify-center overflow-hidden bg-black/35">
+                    <YoutubePlayer url={mediaData.mediaData} componentType="uploadList" />
+                    <span className="absolute left-3 top-3 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1 text-[10px] font-black tracking-[0.12em] text-slate-200 backdrop-blur">
+                        YOUTUBE
+                    </span>
+                </div>
 
-                        <div className="flex-1">
-                            <div className="mb-2">
-                                <strong>컨텐츠 이름:</strong>
-                                <span className="ml-1">
-                                    {!isUpdateMode ? (
-                                        <span>{mediaData.contentsName}</span>
-                                    ) : (
-                                        <span>
-                                            <input
-                                                id="textInput"
-                                                type="text"
-                                                className="p-1 border rounded-xl"
-                                                placeholder="이상형 이름"
-                                                name="contentsName"
-                                                value={mediaData.contentsName}
-                                                onChange={handleMediaData}
-                                            />
-                                        </span>
-                                    )}
-                                </span>
-                            </div>
-                            <div className="mb-2">
-                                <strong>영상 주소: </strong>
-                                <span className="ml-1">
-                                    {!isUpdateMode ? (
-                                        <a
-                                            href={mediaData.mediaData}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-500 hover:underline"
-                                        >
-                                            {mediaData.mediaData}
-                                        </a>
-                                    ) : (
-                                        <input
-                                            id="textInput"
-                                            type="text"
-                                            className="p-1 border rounded-xl"
-                                            placeholder="YouTube URL"
-                                            name="youtubeUrl"
-                                            onChange={changeVideo}
-                                            value={mediaData.mediaData}
-                                        />
-                                    )}
-                                </span>
-                            </div>
-
-                            <div className="mb-2">
-                                <strong>영상 시작 시간:</strong>
-                                <span className="ml-1">
-                                    {!isUpdateMode ? (
-                                        <span>{mediaData.videoStartTime}</span>
-                                    ) : (
-                                        <span>
-                                            <input
-                                                id="textInput"
-                                                type="text"
-                                                className="p-1 border rounded-xl"
-                                                placeholder="ex 00100"
-                                                name="videoStartTime"
-                                                onChange={handleMediaData}
-                                                value={mediaData.videoStartTime}
-                                            />
-                                        </span>
-                                    )}
-                                </span>
-                            </div>
-
-                            <div className="mb-2">
-                                <strong>반복 시간:</strong>
-                                <span className="ml-1">
-                                    {!isUpdateMode ? (
-                                        <span>{mediaData.videoPlayDuration}</span>
-                                    ) : (
-                                        <span>
-                                            <input
-                                                id="textInput"
-                                                type="text"
-                                                className="p-1 border rounded-xl"
-                                                placeholder="3 ~ 5"
-                                                name="videoPlayDuration"
-                                                onChange={handleMediaData}
-                                                value={mediaData.videoPlayDuration}
-                                            />
-                                        </span>
-                                    )}
-                                </span>
-                            </div>
-
-                            <div className="flex">
-                                <div className="mt-0.4">
-                                    <strong>공개 여부:</strong>
+                <div className="flex min-w-0 flex-col p-5">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[10px] font-black tracking-[0.14em] text-slate-600">CANDIDATE {String(index + 1).padStart(2, '0')}</p>
+                            {!isUpdateMode ? (
+                                <h4 className="mt-2 truncate text-lg font-black text-white">{mediaData.contentsName}</h4>
+                            ) : (
+                                <div className="mt-3">
+                                    <label htmlFor={`video-candidate-name-${index}`} className="mb-2 block text-xs font-bold text-slate-300">
+                                        후보 이름
+                                    </label>
+                                    <input
+                                        id={`video-candidate-name-${index}`}
+                                        type="text"
+                                        className={inputClassName}
+                                        placeholder="후보 이름"
+                                        name="contentsName"
+                                        value={mediaData.contentsName}
+                                        onChange={handleMediaData}
+                                    />
                                 </div>
-                                <div className="ml-1 mb-2">
-                                    {!isUpdateMode ? (
-                                        <div>{mediaData.visibleType === 'PUBLIC' ? '공개' : '비공개'}</div>
-                                    ) : (
-                                        <div>
-                                            <select
-                                                name="visibleType"
-                                                value={mediaData.visibleType}
-                                                onChange={handleMediaData}
-                                                className="p-1 border rounded-xl"
-                                            >
-                                                <option value="PUBLIC">공개</option>
-                                                <option value="PRIVATE">비공개</option>
-                                            </select>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                            )}
                         </div>
+                        <span
+                            className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-bold ${
+                                mediaData.visibleType === 'PUBLIC'
+                                    ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-200'
+                                    : 'border-slate-300/10 bg-slate-400/10 text-slate-400'
+                            }`}
+                        >
+                            {mediaData.visibleType === 'PUBLIC' ? '공개' : '비공개'}
+                        </span>
                     </div>
 
-                    <div className="sm:flex sm:flex-col sm:items-end">
-                        <div>
-                            <div>
-                                {!isUpdateMode ? (
-                                    <button
-                                        className="bg-green-500 hover:bg-red-700 text-white font-bold my-2 py-2 px-4 rounded"
-                                        onClick={() => updateContentsMode()}
-                                    >
-                                        수정
-                                    </button>
-                                ) : (
-                                    <div className="sm:flex-col">
-                                        <div>
-                                            <button
-                                                className="bg-green-500 hover:bg-red-700 text-white font-bold my-2 py-2 px-4 rounded"
-                                                onClick={() => applyUpdateContents()}
-                                            >
-                                                적용하기
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                    {!isUpdateMode ? (
+                        <div className="mt-4 min-w-0">
+                            <a
+                                href={mediaData.mediaData}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block truncate text-xs font-semibold text-sky-300 transition hover:text-sky-200 hover:underline"
+                            >
+                                {mediaData.mediaData}
+                            </a>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                <span className="rounded-lg bg-white/[0.05] px-3 py-2 text-[11px] font-semibold text-slate-400">
+                                    시작 {mediaData.videoStartTime || '-'}
+                                </span>
+                                <span className="rounded-lg bg-white/[0.05] px-3 py-2 text-[11px] font-semibold text-slate-400">
+                                    반복 {mediaData.videoPlayDuration || '-'}초
+                                </span>
                             </div>
-                            {!isUpdateMode ? (
+                        </div>
+                    ) : (
+                        <div className="mt-4 space-y-4">
+                            <div>
+                                <label htmlFor={`video-candidate-url-${index}`} className="mb-2 block text-xs font-bold text-slate-300">
+                                    YouTube 영상 주소
+                                </label>
+                                <input
+                                    id={`video-candidate-url-${index}`}
+                                    type="url"
+                                    className={inputClassName}
+                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    name="youtubeUrl"
+                                    onChange={changeVideo}
+                                    value={mediaData.mediaData}
+                                />
+                            </div>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label htmlFor={`video-candidate-start-${index}`} className="mb-2 block text-xs font-bold text-slate-300">
+                                        시작 시간
+                                    </label>
+                                    <input
+                                        id={`video-candidate-start-${index}`}
+                                        type="text"
+                                        inputMode="numeric"
+                                        className={inputClassName}
+                                        placeholder="00030"
+                                        name="videoStartTime"
+                                        onChange={handleMediaData}
+                                        value={mediaData.videoStartTime}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor={`video-candidate-duration-${index}`} className="mb-2 block text-xs font-bold text-slate-300">
+                                        반복 시간
+                                    </label>
+                                    <input
+                                        id={`video-candidate-duration-${index}`}
+                                        type="number"
+                                        min={3}
+                                        max={5}
+                                        className={inputClassName}
+                                        placeholder="3"
+                                        name="videoPlayDuration"
+                                        onChange={handleMediaData}
+                                        value={mediaData.videoPlayDuration}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label htmlFor={`video-candidate-visible-${index}`} className="mb-2 block text-xs font-bold text-slate-300">
+                                    공개 여부
+                                </label>
+                                <select
+                                    id={`video-candidate-visible-${index}`}
+                                    name="visibleType"
+                                    value={mediaData.visibleType}
+                                    onChange={handleMediaData}
+                                    className={inputClassName}
+                                >
+                                    <option value="PUBLIC">공개</option>
+                                    <option value="PRIVATE">비공개</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-auto flex flex-wrap justify-end gap-2 pt-5">
+                        {isUpdateMode ? (
+                            <>
                                 <button
-                                    className="bg-red-500 hover:bg-red-700 text-white font-bold my-2 py-2 px-4 rounded"
+                                    type="button"
+                                    className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-xs font-bold text-slate-300 transition hover:bg-white/[0.08]"
+                                    onClick={cancelUpdateContents}
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    type="button"
+                                    className="h-10 rounded-xl bg-violet-500 px-4 text-xs font-black text-white transition hover:bg-violet-400"
+                                    onClick={applyUpdateContents}
+                                >
+                                    변경 적용
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    type="button"
+                                    className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-xs font-bold text-slate-300 transition hover:bg-white/[0.08]"
+                                    onClick={() => setIsUpdateMode(true)}
+                                >
+                                    편집
+                                </button>
+                                <button
+                                    type="button"
+                                    className="h-10 rounded-xl border border-rose-300/15 bg-rose-400/10 px-4 text-xs font-bold text-rose-200 transition hover:bg-rose-400/20"
                                     onClick={removeContents}
                                 >
                                     삭제
                                 </button>
-                            ) : (
-                                <></>
-                            )}
-                        </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
-        </div>
+        </article>
     );
 };
 

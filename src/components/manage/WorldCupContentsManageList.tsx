@@ -129,19 +129,35 @@ const WorldCupContentsManageList = ({
                 onMediaFileTypeChange={handleMediaFileType}
                 onAdd={applyNewContents}
             />
-            {worldCupContentsList.length > 0 &&
-                worldCupContentsList.map((contents, index) => (
-                    <ManageCardWrapper
-                        key={index}
-                        contents={contents}
-                        index={contents.id}
-                        setWorldCupContentsList={setWorldCupContentsList}
-                        setModifyList={setModifyList}
-                        setDeleteList={setDeleteList}
-                        setNewList={setNewList}
-                        newList={newList}
-                    />
-                ))}
+            {worldCupContentsList.length > 0 && (
+                <section className="mt-7" aria-labelledby="candidate-list-title">
+                    <div className="mb-4 flex items-end justify-between gap-4">
+                        <div>
+                            <span className="text-[10px] font-black tracking-[0.14em] text-sky-200">ADDED CANDIDATES</span>
+                            <h3 id="candidate-list-title" className="mt-1 text-lg font-black text-white">
+                                추가된 후보
+                            </h3>
+                        </div>
+                        <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-bold text-slate-400">
+                            {worldCupContentsList.length}개
+                        </span>
+                    </div>
+                    <div className="space-y-4">
+                        {worldCupContentsList.map((contents, index) => (
+                            <ManageCardWrapper
+                                key={index}
+                                contents={contents}
+                                index={contents.id}
+                                setWorldCupContentsList={setWorldCupContentsList}
+                                setModifyList={setModifyList}
+                                setDeleteList={setDeleteList}
+                                setNewList={setNewList}
+                                newList={newList}
+                            />
+                        ))}
+                    </div>
+                </section>
+            )}
         </div>
     );
 };
