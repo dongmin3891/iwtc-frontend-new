@@ -22,7 +22,7 @@ spec:
             terminationGracePeriodSeconds: 30
             containers:
                 - name: frontend
-                  image: ghcr.io/dongmin3891/iwtc-frontend-new:79379cadfce1678f40d7de53d6ed8374e9f23407
+                  image: ghcr.io/dongmin3891/iwtc-frontend-new:94d96a33bd7d5b95a0ec29bd887b020ea5846966
                   imagePullPolicy: Always
                   securityContext:
                       runAsNonRoot: true
