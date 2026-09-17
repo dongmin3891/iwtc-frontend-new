@@ -23,15 +23,26 @@ export const mergeMediaFile = <T extends MediaMappableContent>(
         return Object.assign(content, { imgUrl: '/images/default.png' });
     }
 
+    const attribution =
+        mediaFile.sourceProvider !== undefined ||
+        mediaFile.sourceExternalId !== undefined ||
+        mediaFile.sourceUrl !== undefined ||
+        mediaFile.sourceAuthor !== undefined ||
+        mediaFile.sourceAuthorUrl !== undefined
+            ? {
+                  sourceProvider: mediaFile.sourceProvider,
+                  sourceExternalId: mediaFile.sourceExternalId,
+                  sourceUrl: mediaFile.sourceUrl,
+                  sourceAuthor: mediaFile.sourceAuthor,
+                  sourceAuthorUrl: mediaFile.sourceAuthorUrl,
+              }
+            : {};
+
     return Object.assign(content, {
         imgUrl: mediaFile.mediaData,
         fileType: mediaFile.fileType,
         videoStartTime: mediaFile.videoStartTime,
         videoPlayDuration: mediaFile.videoPlayDuration,
-        sourceProvider: mediaFile.sourceProvider,
-        sourceExternalId: mediaFile.sourceExternalId,
-        sourceUrl: mediaFile.sourceUrl,
-        sourceAuthor: mediaFile.sourceAuthor,
-        sourceAuthorUrl: mediaFile.sourceAuthorUrl,
+        ...attribution,
     });
 };
