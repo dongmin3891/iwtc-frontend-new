@@ -234,7 +234,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                             disabled={isSelectionLocked}
                             aria-label={`${leftGame.name} 선택`}
                         >
-                            <GameCandidateMedia content={leftGame} />
+                            <GameCandidateMedia content={leftGame} attributionPosition="right" />
                             <span className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/5 to-transparent" />
                             <span className="absolute inset-x-0 bottom-0 z-10 p-5 sm:p-7">
                                 <span className="text-[11px] font-black tracking-[0.16em] text-violet-200">CANDIDATE A</span>
@@ -259,7 +259,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                             disabled={isSelectionLocked}
                             aria-label={`${rightGame.name} 선택`}
                         >
-                            <GameCandidateMedia content={rightGame} />
+                            <GameCandidateMedia content={rightGame} attributionPosition="left" />
                             <span className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/5 to-transparent" />
                             <span className="absolute inset-x-0 bottom-0 z-10 p-5 text-right sm:p-7">
                                 <span className="text-[11px] font-black tracking-[0.16em] text-sky-200">CANDIDATE B</span>
