@@ -152,7 +152,7 @@ const Page = ({ params }: { params: { id: string[] } }) => {
                 <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
                     <div className="min-w-0 space-y-8">
                         <section className="overflow-hidden rounded-[32px] border border-amber-200/20 bg-white/[0.07] shadow-2xl shadow-black/30">
-                            <div className="relative aspect-[16/10] max-h-[560px] min-h-[300px] overflow-hidden bg-black sm:aspect-video">
+                            <div className="relative aspect-[7/6] max-h-[560px] overflow-hidden bg-black sm:aspect-video sm:min-h-[300px]">
                                 <ResultMedia content={winner} priority />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
                                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-9">

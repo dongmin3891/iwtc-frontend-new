@@ -21,11 +21,12 @@ const MediaAttribution = ({
         return null;
     }
 
-    const positionClass = position === 'left' ? 'left-2' : 'right-2';
     const layoutClass =
         variant === 'inline'
             ? 'relative z-20 inline-block w-fit rounded bg-black/75 px-1.5 py-0.5 text-[9px] leading-4'
-            : `absolute bottom-2 ${positionClass} z-20 rounded-md bg-black/70 px-2 py-1 text-[10px] sm:text-xs`;
+            : position === 'left'
+              ? 'absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] break-words rounded-md bg-black/70 px-2 py-1 text-left text-[10px] leading-tight sm:text-xs'
+              : 'absolute bottom-2 right-2 z-20 max-w-[calc(100%-1rem)] break-words rounded-md bg-black/70 px-2 py-1 text-right text-[10px] leading-tight sm:text-xs';
 
     return (
         <div className={`${layoutClass} font-medium text-white ${className}`}>
