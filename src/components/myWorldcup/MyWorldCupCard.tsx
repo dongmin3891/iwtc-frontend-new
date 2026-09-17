@@ -1,7 +1,10 @@
 import { deleteMyWorldCup, ManagedWorldCupSummary } from '@/services/ManageWorldCupService';
 import { getAccessToken } from '@/utils/TokenManager';
 import { useMutation } from '@tanstack/react-query';
+import { useContext } from 'react';
 import Link from 'next/link';
+import ConfirmPopup from '../popup/ConfirmPopup';
+import { PopupContext } from '@/providers/PopupProvider';
 
 interface MyWorldCupCardProps {
     myWorldCup: ManagedWorldCupSummary;
@@ -9,6 +12,7 @@ interface MyWorldCupCardProps {
 }
 
 const MyWorldCupCard = ({ myWorldCup, refetch }: MyWorldCupCardProps) => {
+    const { showPopup, hidePopup } = useContext(PopupContext);
     const { mutate, isLoading, isError, reset } = useMutation(deleteMyWorldCup, {
         onSuccess: () => {
             void refetch();
@@ -16,7 +20,7 @@ const MyWorldCupCard = ({ myWorldCup, refetch }: MyWorldCupCardProps) => {
     });
 
     const removeMyWorldCup = (worldCupId: number) => {
-        if (isLoading || !window.confirm(`‘${myWorldCup.title}’ 월드컵을 삭제할까요? 삭제 후에는 복구할 수 없습니다.`)) {
+        if (isLoading) {
             return;
         }
 
@@ -27,6 +31,25 @@ const MyWorldCupCard = ({ myWorldCup, refetch }: MyWorldCupCardProps) => {
             token: accessToken,
         };
         mutate(params);
+    };
+
+    const showDeleteConfirm = () => {
+        if (isLoading) {
+            return;
+        }
+
+        showPopup(
+            <ConfirmPopup
+                title="월드컵 삭제"
+                message={`‘${myWorldCup.title}’ 월드컵을 삭제할까요?\n삭제한 월드컵과 후보는 복구할 수 없습니다.`}
+                confirmLabel="삭제하기"
+                hidePopup={hidePopup}
+                onConfirm={() => {
+                    hidePopup();
+                    removeMyWorldCup(myWorldCup.worldCupId);
+                }}
+            />
+        );
     };
 
     const isPublic = myWorldCup.visibleType === 'PUBLIC';
@@ -76,7 +99,7 @@ const MyWorldCupCard = ({ myWorldCup, refetch }: MyWorldCupCardProps) => {
                     type="button"
                     disabled={isLoading}
                     className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-2xl border border-rose-300/15 bg-rose-400/[0.06] px-4 text-xs font-black text-rose-200 transition hover:border-rose-300/30 hover:bg-rose-400/10 focus:outline-none focus:ring-2 focus:ring-rose-300/30 disabled:cursor-wait disabled:opacity-60"
-                    onClick={() => removeMyWorldCup(myWorldCup.worldCupId)}
+                    onClick={showDeleteConfirm}
                 >
                     {isLoading && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-rose-200/30 border-t-rose-200" aria-hidden="true" />}
                     {isLoading ? '삭제 중' : '삭제'}
