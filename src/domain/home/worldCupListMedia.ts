@@ -27,12 +27,23 @@ export const mapWorldCupListMedia = async (
         const [response1, response2] = results.filter(isFulfilled).map((result) => result.value);
         const mappedMedia: Pick<
             WCListViewData,
-            'reftImgMediaFileNo' | 'reftFileType' | 'rightImgMediaFileNo' | 'rightFileType'
+            | 'reftImgMediaFileNo'
+            | 'reftFileType'
+            | 'reftSourceProvider'
+            | 'reftSourceAuthor'
+            | 'rightImgMediaFileNo'
+            | 'rightFileType'
+            | 'rightSourceProvider'
+            | 'rightSourceAuthor'
         > = {
             reftImgMediaFileNo: response1 ? response1.data.mediaData : '/images/default.png',
             reftFileType: response1 ? response1.data.fileType || '' : '',
+            reftSourceProvider: response1?.data.sourceProvider,
+            reftSourceAuthor: response1?.data.sourceAuthor,
             rightImgMediaFileNo: response2 ? response2.data.mediaData : '/images/default.png',
             rightFileType: response2 ? response2.data.fileType || '' : '',
+            rightSourceProvider: response2?.data.sourceProvider,
+            rightSourceAuthor: response2?.data.sourceAuthor,
         };
         const mappedItem: WCListViewData = Object.assign(item, mappedMedia);
 
