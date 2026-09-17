@@ -4,9 +4,6 @@ import { Inter } from 'next/font/google';
 import QueryProvider from '@/providers/QueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import Header from '@/components/common/Header';
-import { getSelectorsByUserAgent } from 'react-device-detect';
-import { headers } from 'next/headers';
-import MobileView from '@/components/mobile/MobileView';
 import PopupProvider from '@/providers/PopupProvider';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -36,24 +33,18 @@ export const metadata: Metadata = {
 
 // 이전 버전의 _app 파일의 역할을 대신함
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
-    const { isMobile } = getSelectorsByUserAgent(headers().get('user-agent') ?? '');
-
     return (
         <>
             <html lang="ko">
                 <body className={inter.className} suppressHydrationWarning={true}>
-                    {isMobile ? (
-                        <MobileView />
-                    ) : (
-                        <QueryProvider>
-                            <AuthProvider>
-                                <PopupProvider>
-                                    <Header />
-                                    {children}
-                                </PopupProvider>
-                            </AuthProvider>
-                        </QueryProvider>
-                    )}
+                    <QueryProvider>
+                        <AuthProvider>
+                            <PopupProvider>
+                                <Header />
+                                {children}
+                            </PopupProvider>
+                        </AuthProvider>
+                    </QueryProvider>
                 </body>
             </html>
         </>
