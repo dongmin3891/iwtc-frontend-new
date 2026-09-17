@@ -15,10 +15,14 @@ export interface WCListViewData extends Omit<WCListDataType, 'reftImgMediaFileNo
     reftFileType: string;
     reftVideoStartTime?: string;
     reftVideoPlayDuration?: number;
+    reftSourceProvider?: string | null;
+    reftSourceAuthor?: string | null;
     rightImgMediaFileNo: string;
     rightFileType: string;
     rightVideoStartTime?: string;
     rightVideoPlayDuration?: number;
+    rightSourceProvider?: string | null;
+    rightSourceAuthor?: string | null;
 }
 
 interface WCListApiItem {
