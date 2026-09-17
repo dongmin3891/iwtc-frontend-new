@@ -3,6 +3,7 @@ import { MappedMediaContent } from '@/domain/game/mediaFile';
 import { WorldCupGameContent } from '@/interfaces/models/world-cup/WcGameData';
 import { isMP4 } from '@/utils/common';
 import Image from 'next/image';
+import MediaAttribution from './MediaAttribution';
 
 interface GameCandidateMediaProps {
     content: MappedMediaContent<WorldCupGameContent>;
@@ -32,14 +33,22 @@ const GameCandidateMedia = ({ content }: GameCandidateMediaProps) => {
     }
 
     return (
-        <Image
-            className="object-cover transition duration-500 group-hover:scale-[1.03]"
-            src={content.imgUrl}
-            fill
-            priority
-            sizes="(max-width: 767px) 100vw, 50vw"
-            alt={content.name}
-        />
+        <div className="relative h-full w-full">
+            <Image
+                className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                src={content.imgUrl}
+                fill
+                priority
+                sizes="(max-width: 767px) 100vw, 50vw"
+                alt={content.name}
+            />
+            <MediaAttribution
+                sourceProvider={content.sourceProvider}
+                sourceUrl={content.sourceUrl}
+                sourceAuthor={content.sourceAuthor}
+                sourceAuthorUrl={content.sourceAuthorUrl}
+            />
+        </div>
     );
 };
 
