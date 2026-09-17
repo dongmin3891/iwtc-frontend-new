@@ -3,15 +3,26 @@ interface MediaAttributionProps {
     sourceUrl?: string | null;
     sourceAuthor?: string | null;
     sourceAuthorUrl?: string | null;
+    position?: 'left' | 'right';
 }
 
-const MediaAttribution = ({ sourceProvider, sourceUrl, sourceAuthor, sourceAuthorUrl }: MediaAttributionProps) => {
+const MediaAttribution = ({
+    sourceProvider,
+    sourceUrl,
+    sourceAuthor,
+    sourceAuthorUrl,
+    position = 'right',
+}: MediaAttributionProps) => {
     if (sourceProvider !== 'PEXELS' || !sourceAuthor || !sourceUrl) {
         return null;
     }
 
+    const positionClass = position === 'left' ? 'left-2' : 'right-2';
+
     return (
-        <div className="absolute bottom-2 right-2 z-20 rounded-md bg-black/70 px-2 py-1 text-[10px] font-medium text-white sm:text-xs">
+        <div
+            className={`absolute bottom-2 ${positionClass} z-20 rounded-md bg-black/70 px-2 py-1 text-[10px] font-medium text-white sm:text-xs`}
+        >
             <span>Photo by </span>
             {sourceAuthorUrl ? (
                 <a
