@@ -24,6 +24,11 @@ export interface ManagedMediaFile {
     mediaFileId?: number;
     detailType?: string;
     originalName?: string;
+    sourceProvider?: string | null;
+    sourceExternalId?: string | null;
+    sourceUrl?: string | null;
+    sourceAuthor?: string | null;
+    sourceAuthorUrl?: string | null;
 }
 
 export interface ManagedContent {
