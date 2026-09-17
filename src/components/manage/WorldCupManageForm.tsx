@@ -11,8 +11,7 @@ import AlertPopup from '../popup/AlertPopup';
 interface IProps {
     setIsCreateWorldCup: (isCreated: boolean) => void;
     setWorldCupId: (worldCupId: number) => void;
-    worldCupId?: number;
-    myWorldCupData?: Pick<ManagedWorldCupSummary, 'title' | 'description' | 'visibleType'>;
+    myWorldCupData?: ManagedWorldCupSummary;
     isCreateWorldCup: boolean;
 }
 
@@ -26,7 +25,6 @@ type FieldErrors = Partial<Record<'title' | 'description' | 'visibleType', strin
 const WorldCupManageForm = ({
     setIsCreateWorldCup,
     setWorldCupId,
-    worldCupId,
     myWorldCupData,
     isCreateWorldCup,
 }: IProps) => {
@@ -37,7 +35,8 @@ const WorldCupManageForm = ({
         description: myWorldCupData?.description ?? '',
         visibleType: myWorldCupData?.visibleType ?? 'PUBLIC',
     });
-    const isEditMode = Boolean(myWorldCupData && worldCupId);
+    const editWorldCupId = myWorldCupData?.worldCupId;
+    const isEditMode = Boolean(editWorldCupId);
 
     useEffect(() => {
         if (myWorldCupData) {
@@ -124,9 +123,9 @@ const WorldCupManageForm = ({
             token: getAccessToken(),
         };
 
-        if (isEditMode && worldCupId) {
+        if (isEditMode && editWorldCupId) {
             updateGame.mutate({
-                worldCupId,
+                worldCupId: editWorldCupId,
                 ...payload,
             });
             return;
