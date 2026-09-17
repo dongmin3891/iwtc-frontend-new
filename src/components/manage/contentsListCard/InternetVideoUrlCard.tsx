@@ -4,7 +4,9 @@ import {
     ManagedContent,
     PersistedManagedContentView,
 } from '@/domain/manage/persistedContent';
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { ChangeEvent, Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
+import ConfirmPopup from '@/components/popup/ConfirmPopup';
+import { PopupContext } from '@/providers/PopupProvider';
 
 interface IProps {
     contents: ManagedContent;
@@ -52,6 +54,7 @@ const InternetVideoUrlCard = ({
     setNewList,
     newList,
 }: IProps) => {
+    const { showPopup, hidePopup } = useContext(PopupContext);
     const [mediaData, setMediaData] = useState<InternetVideoContentState>(() =>
         createInternetVideoContentState(contents)
     );
@@ -87,6 +90,27 @@ const InternetVideoUrlCard = ({
                 setDeleteList((current) => [...current, deleteContent]);
             }
         }
+    };
+
+    const showDeleteConfirm = () => {
+        const isPersisted = hasPersistedContentId(contents);
+
+        showPopup(
+            <ConfirmPopup
+                title="후보 삭제"
+                message={`‘${mediaData.contentsName || '이 후보'}’를 삭제할까요?\n${
+                    isPersisted
+                        ? '아래 저장 버튼을 눌러야 실제 삭제가 반영됩니다.'
+                        : '아직 저장되지 않은 후보이며 목록에서 바로 제거됩니다.'
+                }`}
+                confirmLabel="후보 삭제"
+                hidePopup={hidePopup}
+                onConfirm={() => {
+                    hidePopup();
+                    removeContents();
+                }}
+            />
+        );
     };
 
     const changeVideo = (event: ChangeEvent<HTMLInputElement>) => {
@@ -316,7 +340,7 @@ const InternetVideoUrlCard = ({
                                 <button
                                     type="button"
                                     className="h-10 rounded-xl border border-rose-300/15 bg-rose-400/10 px-4 text-xs font-bold text-rose-200 transition hover:bg-rose-400/20"
-                                    onClick={removeContents}
+                                    onClick={showDeleteConfirm}
                                 >
                                     삭제
                                 </button>
