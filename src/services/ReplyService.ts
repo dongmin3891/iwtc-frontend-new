@@ -71,7 +71,6 @@ export const worldCupGameReplyRegister = async ({
 export const worldCupGameReplyDelete = async (commentId: number, token: string) => {
     const response = await ajaxDelete<void>(
         `/comments/${commentId}`,
-        {},
         {
             'access-token': token,
         }

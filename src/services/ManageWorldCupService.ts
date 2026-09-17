@@ -268,7 +268,6 @@ export const removeMyWorldCupContents = async (worldCupId: number, contentsId: n
 
     const response = await ajaxDelete<void>(
         `/me/game-contents-manage/world-cups/${worldCupId}/contents/${contentsId}`,
-        null,
         authHeaders
     );
 
@@ -280,7 +279,7 @@ export const removeMyWorldCupContents = async (worldCupId: number, contentsId: n
 // 나의 이상형 월드컵 리스트에서 삭제
 export const deleteMyWorldCup = async ({ worldCupId, token }: DeleteMyWorldCupRequest) => {
     const authHeaders = createHeader(token);
-    const response = await ajaxDelete<void>(`/me/game-manage/world-cups/${String(worldCupId)}`, null, authHeaders);
+    const response = await ajaxDelete<void>(`/me/game-manage/world-cups/${String(worldCupId)}`, authHeaders);
 
     if (response) {
         return response;

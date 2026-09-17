@@ -144,8 +144,7 @@ export const ajaxPut = async <T = unknown, D = unknown>(
 
 export const ajaxDelete = async <T = unknown>(
     subUrl: string,
-    data: unknown = {},
     headers?: RawAxiosRequestHeaders
 ): Promise<AxiosResponse<T>> => {
-    return instance.delete(subUrl, { data, headers });
+    return instance.delete(subUrl, { headers });
 };
