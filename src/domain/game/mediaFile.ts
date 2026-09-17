@@ -6,6 +6,11 @@ export interface MediaMappableContent {
     fileType?: string;
     videoStartTime?: string;
     videoPlayDuration?: number;
+    sourceProvider?: string | null;
+    sourceExternalId?: string | null;
+    sourceUrl?: string | null;
+    sourceAuthor?: string | null;
+    sourceAuthorUrl?: string | null;
 }
 
 export type MappedMediaContent<T extends MediaMappableContent> = T & MediaMappableContent & { imgUrl: string };
@@ -23,5 +28,10 @@ export const mergeMediaFile = <T extends MediaMappableContent>(
         fileType: mediaFile.fileType,
         videoStartTime: mediaFile.videoStartTime,
         videoPlayDuration: mediaFile.videoPlayDuration,
+        sourceProvider: mediaFile.sourceProvider,
+        sourceExternalId: mediaFile.sourceExternalId,
+        sourceUrl: mediaFile.sourceUrl,
+        sourceAuthor: mediaFile.sourceAuthor,
+        sourceAuthorUrl: mediaFile.sourceAuthorUrl,
     });
 };
