@@ -3,7 +3,7 @@
 import React, { ChangeEvent, FormEvent, useContext, useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { createWorldCup, ManagedWorldCupSummary } from '@/services/ManageWorldCupService';
+import { createWorldCup, ManagedWorldCupSummary, updateMyWorldCup } from '@/services/ManageWorldCupService';
 import { getAccessToken } from '@/utils/TokenManager';
 import { PopupContext } from '@/providers/PopupProvider';
 import AlertPopup from '../popup/AlertPopup';
@@ -11,6 +11,7 @@ import AlertPopup from '../popup/AlertPopup';
 interface IProps {
     setIsCreateWorldCup: (isCreated: boolean) => void;
     setWorldCupId: (worldCupId: number) => void;
+    worldCupId?: number;
     myWorldCupData?: Pick<ManagedWorldCupSummary, 'title' | 'description' | 'visibleType'>;
     isCreateWorldCup: boolean;
 }
@@ -25,6 +26,7 @@ type FieldErrors = Partial<Record<'title' | 'description' | 'visibleType', strin
 const WorldCupManageForm = ({
     setIsCreateWorldCup,
     setWorldCupId,
+    worldCupId,
     myWorldCupData,
     isCreateWorldCup,
 }: IProps) => {
@@ -35,6 +37,7 @@ const WorldCupManageForm = ({
         description: myWorldCupData?.description ?? '',
         visibleType: myWorldCupData?.visibleType ?? 'PUBLIC',
     });
+    const isEditMode = Boolean(myWorldCupData && worldCupId);
 
     useEffect(() => {
         if (myWorldCupData) {
@@ -61,6 +64,19 @@ const WorldCupManageForm = ({
                 return;
             }
             showAlertPopup('월드컵을 만드는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        },
+    });
+
+    const updateGame = useMutation(updateMyWorldCup, {
+        onSuccess: () => {
+            showAlertPopup('월드컵 기본 정보를 저장했습니다.');
+        },
+        onError: (error: unknown) => {
+            if (isAxiosError<ManageWorldCupErrorResponse>(error) && error.response?.data.message) {
+                showAlertPopup(error.response.data.message);
+                return;
+            }
+            showAlertPopup('월드컵 기본 정보를 저장하는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         },
     });
 
@@ -95,21 +111,36 @@ const WorldCupManageForm = ({
         return Object.keys(nextErrors).length === 0;
     };
 
-    const handleCreateWorldCup = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmitWorldCup = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (!validate() || createGame.isLoading || isCreateWorldCup) {
+        if (!validate() || createGame.isLoading || updateGame.isLoading) {
             return;
         }
 
-        createGame.mutate({
+        const payload = {
             title: worldCupInfo.title.trim(),
             description: worldCupInfo.description.trim(),
             visibleType: worldCupInfo.visibleType,
             token: getAccessToken(),
-        });
+        };
+
+        if (isEditMode && worldCupId) {
+            updateGame.mutate({
+                worldCupId,
+                ...payload,
+            });
+            return;
+        }
+
+        if (isCreateWorldCup) {
+            return;
+        }
+
+        createGame.mutate(payload);
     };
 
-    const isDisabled = createGame.isLoading || isCreateWorldCup;
+    const isSaving = createGame.isLoading || updateGame.isLoading;
+    const isDisabled = isSaving || (isCreateWorldCup && !isEditMode);
 
     return (
         <section className="rounded-[28px] border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-6">
@@ -117,7 +148,11 @@ const WorldCupManageForm = ({
                 <div>
                     <span className="text-[11px] font-black tracking-[0.16em] text-violet-200">STEP 01</span>
                     <h2 className="mt-2 text-xl font-black tracking-[-0.03em] text-white">월드컵 기본 정보</h2>
-                    <p className="mt-2 text-xs leading-5 text-slate-400">후보를 추가하기 전에 게임의 주제와 공개 범위를 정해주세요.</p>
+                    <p className="mt-2 text-xs leading-5 text-slate-400">
+                        {isEditMode
+                            ? '게임의 제목, 설명과 공개 범위를 수정한 뒤 별도로 저장하세요.'
+                            : '후보를 추가하기 전에 게임의 주제와 공개 범위를 정해주세요.'}
+                    </p>
                 </div>
                 <span
                     className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold ${
@@ -126,11 +161,11 @@ const WorldCupManageForm = ({
                             : 'border-white/10 bg-white/[0.05] text-slate-400'
                     }`}
                 >
-                    {isCreateWorldCup ? '저장 완료' : '작성 중'}
+                    {isEditMode ? '수정 가능' : isCreateWorldCup ? '저장 완료' : '작성 중'}
                 </span>
             </div>
 
-            <form className="mt-7 space-y-6" onSubmit={handleCreateWorldCup} noValidate>
+            <form className="mt-7 space-y-6" onSubmit={handleSubmitWorldCup} noValidate>
                 <div>
                     <div className="mb-2 flex items-center justify-between gap-3">
                         <label className="text-xs font-bold text-slate-300" htmlFor="title">
@@ -238,7 +273,18 @@ const WorldCupManageForm = ({
                     )}
                 </fieldset>
 
-                {isCreateWorldCup ? (
+                {isEditMode ? (
+                    <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-violet-500 px-5 text-sm font-black text-white shadow-lg shadow-violet-950/30 transition hover:-translate-y-0.5 hover:bg-violet-400 disabled:cursor-wait disabled:opacity-60"
+                    >
+                        {updateGame.isLoading && (
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        )}
+                        {updateGame.isLoading ? '기본 정보 저장 중' : '기본 정보 저장'}
+                    </button>
+                ) : isCreateWorldCup ? (
                     <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-3" role="status">
                         <p className="text-sm font-bold text-emerald-200">기본 정보를 저장했어요.</p>
                         <p className="mt-1 text-xs leading-5 text-emerald-100/60">이제 오른쪽에서 후보를 추가할 수 있습니다.</p>
