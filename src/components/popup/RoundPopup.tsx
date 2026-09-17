@@ -22,7 +22,7 @@ const RoundPopup = ({
     onSelectRound,
     onRetry,
 }: IProps) => {
-    const playableRounds = roundList?.data.rounds.filter((round) => round > 2) ?? [];
+    const playableRounds = roundList?.data.rounds ?? [];
     const worldCupTitle = roundList?.data.worldCupTitle;
 
     return (
