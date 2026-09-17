@@ -1,15 +1,15 @@
 # iwtc-frontend 리팩터링 인수인계
 
 작성일: 2026-09-02
-최종 통합 검수일: 2026-09-03
+최종 업데이트: 2026-09-17
 
 ## 시작 지점
 
 - 기준 브랜치: `prod/v1.0`
 - 작업 브랜치: `refactor/full-project`
-- 마지막 코드 커밋: `5e97c52 refactor: 유튜브 iframe 컴포넌트 타입 연결`
+- 마지막 코드 커밋: `89cdf9b feat: pause public world cup creation`
+- Pexels footer, 수정 화면 개선, 일반 사용자 제작 진입 중단 커밋은 아직 push하지 않았다. 정확한 원격 대비 상태는 `git status --short --branch`로 확인한다.
 - 기존 커밋 인수 검수는 다시 하지 않는다. 현재 작업 브랜치 HEAD부터 이어서 작업한다.
-- 이 문서를 추가한 커밋이 위 코드 커밋 다음에 위치한다.
 
 다른 환경에서 시작할 때:
 
@@ -37,9 +37,11 @@ npm ci
 13. 변경 범위가 크면 문제와 개선 방향을 먼저 정리한다.
 14. 하나의 커밋에는 가능한 한 하나의 리팩터링 목적만 담는다.
 
+Pexels 출처 표시 보완은 별도로 합의된 후속 기능 개선이다. 위 3·4번의 초기 리팩터링 제약에 적용하지 않되, 기존 화면의 핵심 이동·조작 흐름은 유지한다.
+
 ## 현재 검증 기준선
 
-아래 명령은 현재 모두 통과한다.
+아래 명령 전체는 2026-09-03 통합 검수 기준으로 통과했다. 최신 HEAD의 재검증 범위는 아래 `2026-09-17 최신 검증`을 따른다.
 
 ```bash
 npm run lint
@@ -49,14 +51,66 @@ npm test
 npm run build
 ```
 
-- 테스트: 55개, 21 suites
+- 테스트: 65개, 22 suites
 - 테스트 도구: 별도 라이브러리 없이 Node.js `node:test`
 - production build는 `.env.production`을 사용한다.
 - `prod/v1.0` 대비 107개 파일, 원격 작업 브랜치 대비 69개 파일의 변경과 로컬 커밋 35개의 목적을 최종 검토했다.
-- lint에는 기존 `@next/next/no-img-element` 경고 3건이 남아 있다.
-  - `src/app/play-clear/[...id]/page.tsx`: 2건
+- lint에는 기존 `@next/next/no-img-element` 경고 2건이 남아 있다.
   - `src/components/manage/ImageTypeLayout.tsx`: 1건
+  - `src/components/manage/contentsListCard/StaticMediaFileTypeCard.tsx`: 1건
 - build에는 기존 `caniuse-lite is outdated` 안내가 나온다. 의존성 갱신은 이번 리팩터링 범위에 포함하지 않았다.
+
+### 2026-09-17 최신 검증
+
+- `0ceb297` 기준 `npm run typecheck`, `npm run lint`, `npm test`를 통과했다.
+- 실제 브라우저에서 수정 화면의 제목·설명 표시, 비공개 선택, 빈 설명 저장, 저장 후 상단 제목 갱신을 확인했다.
+- 저장 후 관리 상세·내 월드컵 목록·홈 목록 캐시를 무효화한다.
+- Pexels 공통 제공 링크 추가 후 `npm run typecheck`, `npm run lint`, 65개 테스트, `npm run build`를 통과했다.
+- 데스크톱·모바일 브라우저에서 footer 노출을 확인했고, Pexels 링크는 `https://www.pexels.com/`을 새 탭으로 열며 `noopener noreferrer`를 사용한다.
+- 일반 사용자 제작 진입 중단 후에도 동일한 전체 검증을 통과했다. 브라우저에서 데스크톱·모바일 제작 메뉴 제거, `/manage` → `/` 이동, `/manage/[id]` 수정 경로 유지를 확인했다.
+
+## 다음 작업: Pexels 출처 표시 보완
+
+### 일반 사용자 제작 기능 운영 정책
+
+- 이미지 권리·출처·신고·검수 체계가 준비될 때까지 일반 사용자의 신규 월드컵 제작 진입을 중단한다.
+- 헤더와 `내 월드컵` 화면의 제작 링크를 제거했고, `/manage` 직접 접근은 홈으로 임시 이동한다.
+- 기존 소유자의 `/manage/[id]` 수정 화면, 월드컵·후보 생성 API, 자동화 경로는 유지한다.
+- 새 월드컵 제작을 다시 공개할 때는 `/manage` 페이지를 Git 이력에서 복구하고, 업로드 권리 확인·신고 처리·공개 전 검수 정책을 함께 적용한다.
+
+### 판단 기준
+
+- Pexels API 가이드는 API 요청을 사용할 때 눈에 띄는 Pexels 링크를 표시하도록 요구한다. 공통 footer의 `Photos provided by Pexels` 링크는 이 조건을 만족시키는 가장 안전한 방법이지만, footer 위치 자체가 명시적 필수 조건은 아니다.
+- 일반 Pexels 라이선스는 API를 통하지 않은 사진 사용의 출처 표기를 필수로 요구하지 않는다. 따라서 일반 사용자 업로드에 Pexels 메타데이터를 일괄 강제하는 것은 API 준수의 필수 작업이 아니다.
+- `60~70% 준수`처럼 수치로 표현하지 않는다. 외부 자동화가 실제 Pexels API를 호출하는지 확인한 뒤 조건부로 판단한다.
+
+### 현재 소스 확인 결과
+
+- 게임 플레이 화면은 `src/components/game/MediaAttribution.tsx`에서 작가 프로필과 사진 페이지 링크를 표시한다.
+- 홈 목록은 출처 텍스트만 표시한다. `src/domain/home/worldCupListMedia.ts`가 `sourceUrl`, `sourceAuthorUrl`을 화면 모델에 전달하지 않는다.
+- 홈 카드 전체가 `Link`로 감싸져 있으므로 `MediaAttribution`을 그대로 넣으면 링크 중첩이 생긴다. 속성만 추가하지 말고 카드 링크 구조를 함께 분리한다.
+- `src/app/play-clear/[...id]/page.tsx`의 우승자·최종 순위 `ResultMedia`에 출처 표시가 없다. `mappingMediaFile`은 이미 출처 필드를 보존하므로 UI 표시만 연결하면 된다.
+- 같은 결과 화면의 `RankListWrapper`/`RankList` 누적 인기 순위도 이미지를 표시하지만 출처 필드를 props로 전달하지 않는다.
+- 관리·수정 화면의 Pexels 후보 미리보기에도 출처 표시가 없다.
+- 프론트엔드 저장소에는 Pexels API 클라이언트가 없다. API를 사용하는 외부 자동화의 실제 호출 여부와 운영 위치를 확인해야 한다.
+- NestJS 백엔드는 5개 출처 필드의 저장·존재 여부를 검증한다. 다만 `sourceUrl`, `sourceAuthorUrl`은 HTTPS URL인지만 검증하므로 `pexels.com` 호스트나 사진 페이지 형식을 보장하지 않는다.
+- 일반 이미지 업로드는 출처 필드를 받지 않는다. 이는 Pexels API 미준수로 단정하지 않고, 일반 콘텐츠 권리·신고 정책으로 분리한다.
+
+### 권장 구현 순서
+
+1. 외부 자동화의 Pexels API 사용 여부를 확정하고 공통 제공 링크를 추가한다. (프론트엔드·백엔드·인접 프로젝트에서 API 직접 호출은 확인되지 않았고 호출 주체는 외부 자동화로 남아 있다. 백엔드 자동화 경로가 Pexels 출처를 전제로 하므로 `PexelsCreditFooter`를 추가해 서비스 전체에서 노출했다. 완료)
+2. 홈 목록 화면 모델에 `sourceUrl`, `sourceAuthorUrl`을 연결하고 카드 전체 링크와 출처 링크가 중첩되지 않도록 마크업을 조정한다.
+3. 결과 화면의 우승자·최종 순위와 누적 인기 순위에 출처 표시를 연결한다.
+4. 관리·수정 화면의 기존 Pexels 후보 미리보기에 출처 표시를 추가한다.
+5. NestJS 백엔드에서 Pexels 사진 URL·작가 URL의 호스트와 형식을 검증한다. 이 작업은 프론트엔드 표시 커밋과 분리한다.
+
+### 완료 기준
+
+- Pexels 출처가 있는 사진은 게임·홈·결과·누적 순위·관리 미리보기에서 작가와 사진 페이지로 이동할 수 있다.
+- Pexels 출처가 없는 일반 업로드·YouTube·MP4는 빈 크레딧 영역을 표시하지 않는다.
+- 홈 카드에 중첩된 anchor가 없고 카드 이동과 외부 출처 링크가 각각 정상 동작한다.
+- 모바일·데스크톱에서 출처가 이미지·후보명·순위 표시를 가리지 않는다.
+- lint, typecheck, test, production build와 핵심 화면 브라우저 검증을 통과한다.
 
 ## 완료된 주요 범위
 
