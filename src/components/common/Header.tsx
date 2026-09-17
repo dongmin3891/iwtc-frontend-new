@@ -65,16 +65,6 @@ const Header = () => {
                 >
                     <div className="flex flex-col lg:flex-row lg:items-center">
                         <Link
-                            href="/manage"
-                            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
-                            onClick={(event) => {
-                                handleLoginBaseService(event);
-                                setIsMenuOpen(false);
-                            }}
-                        >
-                            월드컵 만들기
-                        </Link>
-                        <Link
                             href={`/members/${userId}/games`}
                             className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
                             onClick={(event) => {

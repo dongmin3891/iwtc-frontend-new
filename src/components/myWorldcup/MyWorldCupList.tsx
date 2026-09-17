@@ -89,16 +89,10 @@ const MyWorldCupList = () => {
             <section className="grid min-h-[340px] place-items-center rounded-[28px] border border-dashed border-white/15 bg-white/[0.04] px-6 py-12 text-center">
                 <div className="max-w-sm">
                     <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white/[0.06] text-2xl" aria-hidden="true">
-                        +
+                        ·
                     </span>
-                    <h2 className="mt-5 text-xl font-black tracking-[-0.03em]">아직 만든 월드컵이 없습니다</h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-400">첫 월드컵을 만들고 이미지나 YouTube 후보를 추가해보세요.</p>
-                    <Link
-                        href="/manage"
-                        className="mt-6 inline-flex min-h-[46px] items-center justify-center rounded-2xl bg-gradient-to-r from-violet-500 to-sky-500 px-5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:brightness-110"
-                    >
-                        새 월드컵 만들기
-                    </Link>
+                    <h2 className="mt-5 text-xl font-black tracking-[-0.03em]">등록된 월드컵이 없습니다</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-400">새 콘텐츠는 운영을 통해 순차적으로 추가됩니다.</p>
                 </div>
             </section>
         );
@@ -113,17 +107,9 @@ const MyWorldCupList = () => {
                         만든 월드컵
                     </h2>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-slate-400">
-                        총 {worldCups.length}개
-                    </span>
-                    <Link
-                        href="/manage"
-                        className="inline-flex min-h-[38px] items-center justify-center rounded-xl bg-white px-4 text-xs font-black text-slate-950 transition hover:-translate-y-0.5 hover:bg-slate-100"
-                    >
-                        새로 만들기
-                    </Link>
-                </div>
+                <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-slate-400">
+                    총 {worldCups.length}개
+                </span>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
