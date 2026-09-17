@@ -1,11 +1,12 @@
 'use client';
 
 import React, { ChangeEvent, FormEvent, useContext, useEffect, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { createWorldCup, ManagedWorldCupSummary, updateMyWorldCup } from '@/services/ManageWorldCupService';
 import { getAccessToken } from '@/utils/TokenManager';
 import { PopupContext } from '@/providers/PopupProvider';
+import { manageWorldCupQueryKeys } from '@/lib/react-query/queryKeys';
 import AlertPopup from '../popup/AlertPopup';
 
 interface IProps {
@@ -29,6 +30,7 @@ const WorldCupManageForm = ({
     isCreateWorldCup,
 }: IProps) => {
     const { showPopup, hidePopup } = useContext(PopupContext);
+    const queryClient = useQueryClient();
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
     const [worldCupInfo, setWorldCupInfo] = useState({
         title: myWorldCupData?.title ?? '',
@@ -67,7 +69,14 @@ const WorldCupManageForm = ({
     });
 
     const updateGame = useMutation(updateMyWorldCup, {
-        onSuccess: () => {
+        onSuccess: async () => {
+            if (editWorldCupId) {
+                await Promise.all([
+                    queryClient.invalidateQueries({ queryKey: manageWorldCupQueryKeys.detail(editWorldCupId) }),
+                    queryClient.invalidateQueries({ queryKey: manageWorldCupQueryKeys.lists() }),
+                    queryClient.invalidateQueries({ queryKey: ['wclist'] }),
+                ]);
+            }
             showAlertPopup('월드컵 기본 정보를 저장했습니다.');
         },
         onError: (error: unknown) => {
@@ -99,8 +108,8 @@ const WorldCupManageForm = ({
         if (!title) {
             nextErrors.title = '월드컵 제목을 입력해주세요.';
         }
-        if (!description || description.length > 100) {
-            nextErrors.description = '설명은 1자 이상 100자 이하로 입력해주세요.';
+        if (description.length > 100) {
+            nextErrors.description = '설명은 100자 이하로 입력해주세요.';
         }
         if (!['PUBLIC', 'PRIVATE'].includes(worldCupInfo.visibleType)) {
             nextErrors.visibleType = '공개 여부를 선택해주세요.';
@@ -182,7 +191,7 @@ const WorldCupManageForm = ({
                         placeholder="예: 최고의 여름 휴가지 월드컵"
                         aria-invalid={Boolean(fieldErrors.title)}
                         aria-describedby={fieldErrors.title ? 'title-error' : 'title-help'}
-                        className={`h-12 w-full rounded-2xl border bg-slate-950/45 px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 ${
+                        className={`h-12 w-full rounded-2xl border bg-slate-950/[0.45] px-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 ${
                             fieldErrors.title
                                 ? 'border-rose-400/60 focus:border-rose-300 focus:ring-rose-400/10'
                                 : 'border-white/10 focus:border-violet-300/50 focus:ring-violet-400/10'
@@ -217,7 +226,7 @@ const WorldCupManageForm = ({
                         placeholder="플레이어가 이해하기 쉽도록 월드컵을 소개해주세요."
                         aria-invalid={Boolean(fieldErrors.description)}
                         aria-describedby={fieldErrors.description ? 'description-error' : 'description-help'}
-                        className={`w-full resize-none rounded-2xl border bg-slate-950/45 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-slate-600 focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 ${
+                        className={`w-full resize-none rounded-2xl border bg-slate-950/[0.45] px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-slate-600 focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 ${
                             fieldErrors.description
                                 ? 'border-rose-400/60 focus:border-rose-300 focus:ring-rose-400/10'
                                 : 'border-white/10 focus:border-violet-300/50 focus:ring-violet-400/10'
