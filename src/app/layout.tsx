@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import QueryProvider from '@/providers/QueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import Header from '@/components/common/Header';
+import PexelsCreditFooter from '@/components/common/PexelsCreditFooter';
 import PopupProvider from '@/providers/PopupProvider';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -42,6 +43,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
                             <PopupProvider>
                                 <Header />
                                 {children}
+                                <PexelsCreditFooter />
                             </PopupProvider>
                         </AuthProvider>
                     </QueryProvider>
