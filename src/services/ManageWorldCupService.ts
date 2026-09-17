@@ -12,6 +12,10 @@ interface CreateWorldCupRequest {
     token: string;
 }
 
+interface UpdateWorldCupRequest extends CreateWorldCupRequest {
+    worldCupId: number;
+}
+
 interface CreateWorldCupResponse {
     data: number;
 }
@@ -60,6 +64,23 @@ export const createWorldCup = async ({ title, description, visibleType, token }:
         headers: authHeaders,
     });
     return response.data;
+};
+
+// 이상형 기본 정보 수정
+export const updateMyWorldCup = async ({
+    worldCupId,
+    title,
+    description,
+    visibleType,
+    token,
+}: UpdateWorldCupRequest) => {
+    const authHeaders = createHeader(token);
+    const param = { title, description, visibleType };
+
+    return ajaxPut<void, typeof param>(`/me/game-manage/world-cups/${worldCupId}`, param, {
+        headers: authHeaders,
+        timeout: 5000,
+    });
 };
 
 // 이상형 컨텐츠 생성
