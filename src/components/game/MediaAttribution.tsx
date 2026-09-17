@@ -11,7 +11,7 @@ const MediaAttribution = ({ sourceProvider, sourceUrl, sourceAuthor, sourceAutho
     }
 
     return (
-        <div className="absolute bottom-2 right-2 z-20 rounded-md bg-black/65 px-2 py-1 text-[10px] font-medium text-white/85 backdrop-blur-sm sm:text-xs">
+        <div className="absolute bottom-2 right-2 z-20 rounded-md bg-black/70 px-2 py-1 text-[10px] font-medium text-white sm:text-xs">
             <span>Photo by </span>
             {sourceAuthorUrl ? (
                 <a
