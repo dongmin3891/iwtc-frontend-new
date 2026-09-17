@@ -2,6 +2,7 @@ import { ManagedContent, PersistedManagedContentView } from '@/domain/manage/per
 import { ChangeEvent, Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
 import ConfirmPopup from '@/components/popup/ConfirmPopup';
 import { PopupContext } from '@/providers/PopupProvider';
+import MediaAttribution from '@/components/game/MediaAttribution';
 
 interface IProps {
     contents: ManagedContent | '';
@@ -26,6 +27,11 @@ interface StaticMediaContentState {
     detailFileType?: string;
     mediaFileId?: number;
     uploadFile?: File;
+    sourceProvider?: string | null;
+    sourceExternalId?: string | null;
+    sourceUrl?: string | null;
+    sourceAuthor?: string | null;
+    sourceAuthorUrl?: string | null;
 }
 
 const createStaticMediaContentState = (contents: ManagedContent | ''): StaticMediaContentState => ({
@@ -41,6 +47,11 @@ const createStaticMediaContentState = (contents: ManagedContent | ''): StaticMed
     detailFileType: contents ? contents.detailFileType : undefined,
     mediaFileId: contents ? contents.mediaFileId : undefined,
     uploadFile: contents ? contents.uploadFile : undefined,
+    sourceProvider: contents ? contents.sourceProvider : undefined,
+    sourceExternalId: contents ? contents.sourceExternalId : undefined,
+    sourceUrl: contents ? contents.sourceUrl : undefined,
+    sourceAuthor: contents ? contents.sourceAuthor : undefined,
+    sourceAuthorUrl: contents ? contents.sourceAuthorUrl : undefined,
 });
 
 const hasPersistedContentId = (contents: ManagedContent): contents is PersistedManagedContentView =>
@@ -144,6 +155,11 @@ const StaticMediaFileTypeCard = ({
                         visibleType: mediaData.visibleType,
                         detailFileType: mediaData.detailFileType,
                         uploadFile: mediaData.uploadFile,
+                        sourceProvider: mediaData.sourceProvider,
+                        sourceExternalId: mediaData.sourceExternalId,
+                        sourceUrl: mediaData.sourceUrl,
+                        sourceAuthor: mediaData.sourceAuthor,
+                        sourceAuthorUrl: mediaData.sourceAuthorUrl,
                     };
                     updateResult.content = modifiedContent;
                     return modifiedContent;
@@ -207,6 +223,11 @@ const StaticMediaFileTypeCard = ({
             originalName: imageFile.name,
             detailFileType: imageFile.type.replace('image/', '').toUpperCase(),
             uploadFile: imageFile,
+            sourceProvider: undefined,
+            sourceExternalId: undefined,
+            sourceUrl: undefined,
+            sourceAuthor: undefined,
+            sourceAuthorUrl: undefined,
         }));
     };
 
@@ -228,6 +249,12 @@ const StaticMediaFileTypeCard = ({
                     ) : (
                         <span className="text-xs font-semibold text-slate-600">미리보기 없음</span>
                     )}
+                    <MediaAttribution
+                        sourceProvider={mediaData.sourceProvider}
+                        sourceUrl={mediaData.sourceUrl}
+                        sourceAuthor={mediaData.sourceAuthor}
+                        sourceAuthorUrl={mediaData.sourceAuthorUrl}
+                    />
                     <span className="absolute left-3 top-3 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1 text-[10px] font-black tracking-[0.12em] text-slate-200 backdrop-blur">
                         IMAGE
                     </span>

@@ -28,6 +28,11 @@ describe('normalizePersistedManagedContent', () => {
                 mediaFileId: 7,
                 detailType: 'IMAGE',
                 originalName: 'server-name.png',
+                sourceProvider: 'PEXELS',
+                sourceExternalId: '1234',
+                sourceUrl: 'https://www.pexels.com/photo/example-1234/',
+                sourceAuthor: 'Example Author',
+                sourceAuthorUrl: 'https://www.pexels.com/@example-author',
             },
             2
         );
@@ -38,6 +43,10 @@ describe('normalizePersistedManagedContent', () => {
         assert.equal(result.imgType, 'data:image/png;base64,example');
         assert.equal(result.mp4Type, undefined);
         assert.equal(result.visibleType, 'PUBLIC');
+        assert.equal(result.sourceProvider, 'PEXELS');
+        assert.equal(result.sourceUrl, 'https://www.pexels.com/photo/example-1234/');
+        assert.equal(result.sourceAuthor, 'Example Author');
+        assert.equal(result.sourceAuthorUrl, 'https://www.pexels.com/@example-author');
     });
 
     it('classifies an MP4 media response without changing its payload', () => {

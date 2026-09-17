@@ -68,6 +68,8 @@ npm run build
 - Pexels 공통 제공 링크 추가 후 `npm run typecheck`, `npm run lint`, 65개 테스트, `npm run build`를 통과했다.
 - 데스크톱·모바일 브라우저에서 footer 노출을 확인했고, Pexels 링크는 `https://www.pexels.com/`을 새 탭으로 열며 `noopener noreferrer`를 사용한다.
 - 일반 사용자 제작 진입 중단 후에도 동일한 전체 검증을 통과했다. 브라우저에서 데스크톱·모바일 제작 메뉴 제거, `/manage` → `/` 이동, `/manage/[id]` 수정 경로 유지를 확인했다.
+- Pexels 사진 URL·작가 URL을 홈 목록, 결과 화면의 우승자·최종 순위·누적 인기 순위, 관리·수정 미리보기까지 연결했다. 최신 변경 기준 `npm run typecheck`, `npm run lint`, 65개 테스트, `npm run build`를 통과했다.
+- 브라우저 모킹 검증에서 홈 카드 시작 링크와 작가·사진 링크가 중첩되지 않고 각각 올바른 URL을 가리키는 것을 확인했다. 결과 화면에서도 우승자·최종 순위·누적 인기 순위 링크를 확인했다.
 
 ## 다음 작업: Pexels 출처 표시 보완
 
@@ -87,22 +89,22 @@ npm run build
 ### 현재 소스 확인 결과
 
 - 게임 플레이 화면은 `src/components/game/MediaAttribution.tsx`에서 작가 프로필과 사진 페이지 링크를 표시한다.
-- 홈 목록은 출처 텍스트만 표시한다. `src/domain/home/worldCupListMedia.ts`가 `sourceUrl`, `sourceAuthorUrl`을 화면 모델에 전달하지 않는다.
-- 홈 카드 전체가 `Link`로 감싸져 있으므로 `MediaAttribution`을 그대로 넣으면 링크 중첩이 생긴다. 속성만 추가하지 말고 카드 링크 구조를 함께 분리한다.
-- `src/app/play-clear/[...id]/page.tsx`의 우승자·최종 순위 `ResultMedia`에 출처 표시가 없다. `mappingMediaFile`은 이미 출처 필드를 보존하므로 UI 표시만 연결하면 된다.
-- 같은 결과 화면의 `RankListWrapper`/`RankList` 누적 인기 순위도 이미지를 표시하지만 출처 필드를 props로 전달하지 않는다.
-- 관리·수정 화면의 Pexels 후보 미리보기에도 출처 표시가 없다.
+- 홈 목록은 사진 URL·작가 URL을 화면 모델까지 전달하며, 카드 전체 이동 링크와 출처 링크를 형제 요소로 분리해 중첩 anchor 없이 표시한다.
+- `src/app/play-clear/[...id]/page.tsx`의 우승자·최종 순위와 `RankListWrapper`/`RankList` 누적 인기 순위에 공통 출처 표시를 연결했다.
+- 관리·수정 화면은 기존 Pexels 후보의 출처 메타데이터를 조회 모델과 편집 상태에 보존하고 미리보기에 표시한다.
 - 프론트엔드 저장소에는 Pexels API 클라이언트가 없다. API를 사용하는 외부 자동화의 실제 호출 여부와 운영 위치를 확인해야 한다.
-- NestJS 백엔드는 5개 출처 필드의 저장·존재 여부를 검증한다. 다만 `sourceUrl`, `sourceAuthorUrl`은 HTTPS URL인지만 검증하므로 `pexels.com` 호스트나 사진 페이지 형식을 보장하지 않는다.
+- NestJS 백엔드는 5개 출처 필드의 저장·존재 여부와 함께 `sourceUrl`의 Pexels 사진 경로, `sourceAuthorUrl`의 Pexels 작가 경로를 검증한다.
+- 관리 화면에서 기존 Pexels 이미지를 일반 업로드 이미지로 교체하면 프론트 상태에서 출처를 즉시 제거하고, 백엔드도 기존 출처 5개 필드를 `null`로 초기화한다. 파일을 교체하지 않는 후보명·공개 여부 수정은 기존 출처를 유지한다.
 - 일반 이미지 업로드는 출처 필드를 받지 않는다. 이는 Pexels API 미준수로 단정하지 않고, 일반 콘텐츠 권리·신고 정책으로 분리한다.
 
 ### 권장 구현 순서
 
 1. 외부 자동화의 Pexels API 사용 여부를 확정하고 공통 제공 링크를 추가한다. (프론트엔드·백엔드·인접 프로젝트에서 API 직접 호출은 확인되지 않았고 호출 주체는 외부 자동화로 남아 있다. 백엔드 자동화 경로가 Pexels 출처를 전제로 하므로 `PexelsCreditFooter`를 추가해 서비스 전체에서 노출했다. 완료)
-2. 홈 목록 화면 모델에 `sourceUrl`, `sourceAuthorUrl`을 연결하고 카드 전체 링크와 출처 링크가 중첩되지 않도록 마크업을 조정한다.
-3. 결과 화면의 우승자·최종 순위와 누적 인기 순위에 출처 표시를 연결한다.
-4. 관리·수정 화면의 기존 Pexels 후보 미리보기에 출처 표시를 추가한다.
-5. NestJS 백엔드에서 Pexels 사진 URL·작가 URL의 호스트와 형식을 검증한다. 이 작업은 프론트엔드 표시 커밋과 분리한다.
+2. 홈 목록 화면 모델에 `sourceUrl`, `sourceAuthorUrl`을 연결하고 카드 전체 링크와 출처 링크가 중첩되지 않도록 마크업을 조정한다. (완료)
+3. 결과 화면의 우승자·최종 순위와 누적 인기 순위에 출처 표시를 연결한다. (완료)
+4. 관리·수정 화면의 기존 Pexels 후보 미리보기에 출처 표시를 추가한다. (완료)
+5. NestJS 백엔드에서 Pexels 사진 URL·작가 URL의 호스트와 형식을 검증한다. (백엔드 작업 완료, 프론트엔드 표시 변경과 별도 커밋 예정)
+6. 기존 Pexels 이미지를 일반 업로드로 교체할 때 백엔드가 이전 출처 메타데이터를 제거하도록 수정한다. (완료)
 
 ### 완료 기준
 

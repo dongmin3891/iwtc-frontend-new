@@ -13,27 +13,36 @@ const createItem = (): WCListDataType => ({
     rightImgMediaFileNo: 20,
 });
 
-const media = (mediaData: string) => ({
+const media = (mediaData: string, author: string) => ({
     data: {
         mediaData,
         fileType: 'STATIC_MEDIA_FILE',
+        sourceProvider: 'PEXELS',
+        sourceUrl: `https://www.pexels.com/photo/${author}`,
+        sourceAuthor: author,
+        sourceAuthorUrl: `https://www.pexels.com/@${author}`,
     },
 });
 
 describe('mapWorldCupListMedia', () => {
     it('maps both sides when both media requests succeed', async () => {
-        const loader: WorldCupListMediaLoader = async (id) => media(id === 10 ? 'left-image' : 'right-image');
+        const loader: WorldCupListMediaLoader = async (id) =>
+            id === 10 ? media('left-image', 'left-author') : media('right-image', 'right-author');
 
         const [result] = await mapWorldCupListMedia([createItem()], loader);
 
         assert.equal(result.reftImgMediaFileNo, 'left-image');
         assert.equal(result.rightImgMediaFileNo, 'right-image');
+        assert.equal(result.reftSourceUrl, 'https://www.pexels.com/photo/left-author');
+        assert.equal(result.reftSourceAuthorUrl, 'https://www.pexels.com/@left-author');
+        assert.equal(result.rightSourceUrl, 'https://www.pexels.com/photo/right-author');
+        assert.equal(result.rightSourceAuthorUrl, 'https://www.pexels.com/@right-author');
     });
 
     it('preserves the existing shifted placement when only the left request rejects', async () => {
         const loader: WorldCupListMediaLoader = async (id) => {
             if (id === 10) throw new Error('left failed');
-            return media('right-image');
+            return media('right-image', 'right-author');
         };
 
         const [result] = await mapWorldCupListMedia([createItem()], loader);
@@ -45,7 +54,7 @@ describe('mapWorldCupListMedia', () => {
     it('keeps the left response in place when only the right request rejects', async () => {
         const loader: WorldCupListMediaLoader = async (id) => {
             if (id === 20) throw new Error('right failed');
-            return media('left-image');
+            return media('left-image', 'left-author');
         };
 
         const [result] = await mapWorldCupListMedia([createItem()], loader);

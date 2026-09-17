@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import CustomYoutubePlayer from '@/components/youtubePlayer/CustomYoutubePlayer';
 import { MappedMediaContent } from '@/domain/game/mediaFile';
 import { WorldCupClearContent } from '@/interfaces/models/world-cup/WcGameData';
+import MediaAttribution from '@/components/game/MediaAttribution';
 
 type ClearContentView = MappedMediaContent<WorldCupClearContent>;
 
@@ -40,14 +41,22 @@ const ResultMedia = ({ content, priority = false }: ResultMediaProps) => {
     }
 
     return (
-        <Image
-            className="object-cover"
-            src={content.imgUrl}
-            fill
-            priority={priority}
-            sizes="(max-width: 1023px) 100vw, 65vw"
-            alt={content.contentsName}
-        />
+        <div className="relative h-full w-full">
+            <Image
+                className="object-cover"
+                src={content.imgUrl}
+                fill
+                priority={priority}
+                sizes="(max-width: 1023px) 100vw, 65vw"
+                alt={content.contentsName}
+            />
+            <MediaAttribution
+                sourceProvider={content.sourceProvider}
+                sourceUrl={content.sourceUrl}
+                sourceAuthor={content.sourceAuthor}
+                sourceAuthorUrl={content.sourceAuthorUrl}
+            />
+        </div>
     );
 };
 

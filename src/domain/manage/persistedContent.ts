@@ -48,6 +48,11 @@ export interface ManagedContent {
     originalName?: string;
     absoluteName?: string;
     uploadFile?: File;
+    sourceProvider?: string | null;
+    sourceExternalId?: string | null;
+    sourceUrl?: string | null;
+    sourceAuthor?: string | null;
+    sourceAuthorUrl?: string | null;
 }
 
 export interface PersistedManagedContentView extends ManagedContent {
@@ -101,18 +106,31 @@ export const normalizePersistedManagedContent = (
     content: PersistedManagedContent,
     mediaFile: ManagedMediaFile | undefined,
     index: number
-): PersistedManagedContentView => ({
-    id: index,
-    contentsId: content.contentsId,
-    contentsName: content.contentsName,
-    videoStartTime: mediaFile?.videoStartTime || content.videoStartTime,
-    videoPlayDuration: mediaFile?.videoPlayDuration || content.videoPlayDuration,
-    visibleType: mediaFile?.visibleType || content.visibleType,
-    fileType: mediaFile?.fileType === 'STATIC_MEDIA_FILE' ? 'file' : content.fileType,
-    mediaData: mediaFile?.mediaData || content.mediaPath,
-    mediaFileId: mediaFile?.mediaFileId ?? content.mediaFileId ?? undefined,
-    mp4Type: mediaFile ? (isMP4(mediaFile.mediaData) ? mediaFile.mediaData : undefined) : content.mp4Type,
-    imgType: mediaFile ? (!isMP4(mediaFile.mediaData) ? mediaFile.mediaData : undefined) : content.imgType,
-    detailFileType: mediaFile ? mediaFile.detailType : content.detailFileType,
-    originalName: mediaFile ? mediaFile.originalName : content.originalName,
-});
+): PersistedManagedContentView => {
+    const attribution = mediaFile
+        ? {
+              sourceProvider: mediaFile.sourceProvider,
+              sourceExternalId: mediaFile.sourceExternalId,
+              sourceUrl: mediaFile.sourceUrl,
+              sourceAuthor: mediaFile.sourceAuthor,
+              sourceAuthorUrl: mediaFile.sourceAuthorUrl,
+          }
+        : {};
+
+    return {
+        id: index,
+        contentsId: content.contentsId,
+        contentsName: content.contentsName,
+        videoStartTime: mediaFile?.videoStartTime || content.videoStartTime,
+        videoPlayDuration: mediaFile?.videoPlayDuration || content.videoPlayDuration,
+        visibleType: mediaFile?.visibleType || content.visibleType,
+        fileType: mediaFile?.fileType === 'STATIC_MEDIA_FILE' ? 'file' : content.fileType,
+        mediaData: mediaFile?.mediaData || content.mediaPath,
+        mediaFileId: mediaFile?.mediaFileId ?? content.mediaFileId ?? undefined,
+        mp4Type: mediaFile ? (isMP4(mediaFile.mediaData) ? mediaFile.mediaData : undefined) : content.mp4Type,
+        imgType: mediaFile ? (!isMP4(mediaFile.mediaData) ? mediaFile.mediaData : undefined) : content.imgType,
+        detailFileType: mediaFile ? mediaFile.detailType : content.detailFileType,
+        originalName: mediaFile ? mediaFile.originalName : content.originalName,
+        ...attribution,
+    };
+};

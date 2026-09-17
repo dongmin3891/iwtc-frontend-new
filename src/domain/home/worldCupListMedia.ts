@@ -30,20 +30,28 @@ export const mapWorldCupListMedia = async (
             | 'reftImgMediaFileNo'
             | 'reftFileType'
             | 'reftSourceProvider'
+            | 'reftSourceUrl'
             | 'reftSourceAuthor'
+            | 'reftSourceAuthorUrl'
             | 'rightImgMediaFileNo'
             | 'rightFileType'
             | 'rightSourceProvider'
+            | 'rightSourceUrl'
             | 'rightSourceAuthor'
+            | 'rightSourceAuthorUrl'
         > = {
             reftImgMediaFileNo: response1 ? response1.data.mediaData : '/images/default.png',
             reftFileType: response1 ? response1.data.fileType || '' : '',
             reftSourceProvider: response1?.data.sourceProvider,
+            reftSourceUrl: response1?.data.sourceUrl,
             reftSourceAuthor: response1?.data.sourceAuthor,
+            reftSourceAuthorUrl: response1?.data.sourceAuthorUrl,
             rightImgMediaFileNo: response2 ? response2.data.mediaData : '/images/default.png',
             rightFileType: response2 ? response2.data.fileType || '' : '',
             rightSourceProvider: response2?.data.sourceProvider,
+            rightSourceUrl: response2?.data.sourceUrl,
             rightSourceAuthor: response2?.data.sourceAuthor,
+            rightSourceAuthorUrl: response2?.data.sourceAuthorUrl,
         };
         const mappedItem: WCListViewData = Object.assign(item, mappedMedia);
 

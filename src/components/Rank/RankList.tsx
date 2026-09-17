@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import CustomYoutubePlayer from '../youtubePlayer/CustomYoutubePlayer';
 import { isMP4 } from '@/utils/common';
+import MediaAttribution from '@/components/game/MediaAttribution';
 
 interface IProps {
     contentsName: string;
@@ -10,10 +11,26 @@ interface IProps {
     fileType?: string;
     videoStartTime?: string;
     videoPlayDuration?: number;
+    sourceProvider?: string | null;
+    sourceUrl?: string | null;
+    sourceAuthor?: string | null;
+    sourceAuthorUrl?: string | null;
     gameScore: number;
 }
 
-const RankList = ({ contentsName, rank, imgUrl, fileType, videoStartTime, videoPlayDuration, gameScore }: IProps) => {
+const RankList = ({
+    contentsName,
+    rank,
+    imgUrl,
+    fileType,
+    videoStartTime,
+    videoPlayDuration,
+    sourceProvider,
+    sourceUrl,
+    sourceAuthor,
+    sourceAuthorUrl,
+    gameScore,
+}: IProps) => {
     return (
         <li className="flex items-center gap-4 rounded-2xl border border-white/5 bg-slate-950/35 p-3 sm:p-4">
             <span
@@ -26,6 +43,14 @@ const RankList = ({ contentsName, rank, imgUrl, fileType, videoStartTime, videoP
             <div className="min-w-0 flex-1">
                 <p className="truncate font-bold text-white">{contentsName}</p>
                 <p className="mt-1 text-xs font-semibold text-slate-500">누적 {gameScore.toLocaleString()}점</p>
+                <MediaAttribution
+                    sourceProvider={sourceProvider}
+                    sourceUrl={sourceUrl}
+                    sourceAuthor={sourceAuthor}
+                    sourceAuthorUrl={sourceAuthorUrl}
+                    variant="inline"
+                    className="mt-1 max-w-full truncate"
+                />
             </div>
             <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-black sm:h-20 sm:w-28">
                 {fileType === 'INTERNET_VIDEO_URL' ? (

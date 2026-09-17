@@ -78,6 +78,10 @@ const RankListWrapper = ({ contentsId }: IProps) => {
                                 fileType={items.fileType}
                                 videoStartTime={items.videoStartTime}
                                 videoPlayDuration={items.videoPlayDuration}
+                                sourceProvider={items.sourceProvider}
+                                sourceUrl={items.sourceUrl}
+                                sourceAuthor={items.sourceAuthor}
+                                sourceAuthorUrl={items.sourceAuthorUrl}
                                 gameScore={items.gameScore}
                             />
                         ))}
