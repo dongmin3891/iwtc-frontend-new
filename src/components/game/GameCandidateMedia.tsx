@@ -7,9 +7,10 @@ import MediaAttribution from './MediaAttribution';
 
 interface GameCandidateMediaProps {
     content: MappedMediaContent<WorldCupGameContent>;
+    attributionPosition?: 'left' | 'right';
 }
 
-const GameCandidateMedia = ({ content }: GameCandidateMediaProps) => {
+const GameCandidateMedia = ({ content, attributionPosition = 'right' }: GameCandidateMediaProps) => {
     if (content.fileType === 'INTERNET_VIDEO_URL') {
         return (
             <div className="h-full w-full bg-black [&>div]:h-full [&_iframe]:h-full [&_iframe]:w-full">
@@ -47,6 +48,7 @@ const GameCandidateMedia = ({ content }: GameCandidateMediaProps) => {
                 sourceUrl={content.sourceUrl}
                 sourceAuthor={content.sourceAuthor}
                 sourceAuthorUrl={content.sourceAuthorUrl}
+                position={attributionPosition}
             />
         </div>
     );
