@@ -17,11 +17,15 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
         reftFileType,
         reftVideoPlayDuration,
         reftVideoStartTime,
+        reftSourceProvider,
+        reftSourceAuthor,
         rightContentName,
         rightImgMediaFileNo,
         rightFileType,
         rightVideoPlayDuration,
         rightVideoStartTime,
+        rightSourceProvider,
+        rightSourceAuthor,
         description,
         worldCupId,
     } = wcList;
@@ -63,6 +67,18 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
         );
     };
 
+    const renderAttribution = (sourceProvider?: string | null, sourceAuthor?: string | null) => {
+        if (sourceProvider !== 'PEXELS' || !sourceAuthor) {
+            return null;
+        }
+
+        return (
+            <span className="max-w-[calc(100%-1rem)] truncate rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-medium leading-4 text-white sm:text-[10px]">
+                Photo by {sourceAuthor} · Pexels
+            </span>
+        );
+    };
+
     return (
         <article className="group min-w-0">
             <Link
@@ -79,6 +95,9 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
                             reftVideoPlayDuration
                         )}
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-4 pb-3 pt-10">
+                            <div className="mb-1 flex justify-end">
+                                {renderAttribution(reftSourceProvider, reftSourceAuthor)}
+                            </div>
                             <p className="truncate text-sm font-bold text-white">{reftContentName || '후보 준비 중'}</p>
                         </div>
                     </div>
@@ -91,6 +110,9 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
                             rightVideoPlayDuration
                         )}
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-4 pb-3 pt-10 text-right">
+                            <div className="mb-1 flex justify-start">
+                                {renderAttribution(rightSourceProvider, rightSourceAuthor)}
+                            </div>
                             <p className="truncate text-sm font-bold text-white">
                                 {rightContentName || '후보 준비 중'}
                             </p>
