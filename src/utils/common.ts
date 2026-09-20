@@ -9,6 +9,12 @@ export const mappingMediaFile = async <T extends MediaMappableContent>(
     gameList: T[]
 ): Promise<MappedMediaContent<T>[]> => {
     const promises = gameList.map(async (item) => {
+        if ('mediaFile' in item) {
+            return mergeMediaFile(item, item.mediaFile ?? undefined);
+        }
+        if (!item.mediaFileId) {
+            return mergeMediaFile(item, undefined);
+        }
         try {
             const response = await getMediaFileAPI(item.mediaFileId); // API 호출
             return mergeMediaFile(item, response?.data);

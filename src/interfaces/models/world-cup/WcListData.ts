@@ -1,3 +1,5 @@
+import { ManagedMediaFile } from '@/domain/manage/persistedContent';
+
 export interface WCListDataType {
     reftContentName: string;
     rightContentName: string;
@@ -6,8 +8,10 @@ export interface WCListDataType {
     // rightImgPath: string;
     worldCupId: number;
     gameTitle: string;
-    reftImgMediaFileNo: number;
-    rightImgMediaFileNo: number;
+    reftImgMediaFileNo: number | null;
+    reftMediaFile?: ManagedMediaFile | null;
+    rightImgMediaFileNo: number | null;
+    rightMediaFile?: ManagedMediaFile | null;
 }
 
 export interface WCListViewData extends Omit<WCListDataType, 'reftImgMediaFileNo' | 'rightImgMediaFileNo'> {
@@ -33,8 +37,10 @@ interface WCListApiItem {
     contentsName1: string;
     contentsName2: string;
     description: string;
-    mediaFileId1: number;
-    mediaFileId2: number;
+    mediaFileId1: number | null;
+    mediaFile1?: ManagedMediaFile | null;
+    mediaFileId2: number | null;
+    mediaFile2?: ManagedMediaFile | null;
     worldCupId: number;
     title: string;
 }
@@ -81,7 +87,9 @@ export const mapWCListData = (data: WCListApiItem): WCListDataType => {
         rightContentName: data.contentsName2,
         description: data.description,
         reftImgMediaFileNo: data.mediaFileId1,
+        ...(data.mediaFile1 !== undefined ? { reftMediaFile: data.mediaFile1 } : {}),
         rightImgMediaFileNo: data.mediaFileId2,
+        ...(data.mediaFile2 !== undefined ? { rightMediaFile: data.mediaFile2 } : {}),
         // reftImgPath: data.filePath1,
         // rightImgPath: data.filePath2,
         worldCupId: data.worldCupId,

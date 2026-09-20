@@ -18,9 +18,18 @@ export const mapWorldCupListMedia = async (
     loadMediaFile: WorldCupListMediaLoader
 ): Promise<WCListViewData[]> => {
     const promises = gameList.map(async (item): Promise<WCListViewData> => {
+        const loadEmbeddedOrFallback = (
+            mediaFileId: number | null,
+            embeddedMedia: ManagedMediaFile | null | undefined
+        ): Promise<WorldCupListMediaResponse | undefined> => {
+            if (embeddedMedia !== undefined) {
+                return Promise.resolve(embeddedMedia ? { data: embeddedMedia } : undefined);
+            }
+            return mediaFileId ? loadMediaFile(mediaFileId, 'divide2') : Promise.resolve(undefined);
+        };
         const results = await Promise.allSettled([
-            loadMediaFile(item.reftImgMediaFileNo, 'divide2'),
-            loadMediaFile(item.rightImgMediaFileNo, 'divide2'),
+            loadEmbeddedOrFallback(item.reftImgMediaFileNo, item.reftMediaFile),
+            loadEmbeddedOrFallback(item.rightImgMediaFileNo, item.rightMediaFile),
         ]);
 
         // Keep the existing fulfilled-result compaction behavior. A positional fix is a separate change.

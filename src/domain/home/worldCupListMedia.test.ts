@@ -39,6 +39,25 @@ describe('mapWorldCupListMedia', () => {
         assert.equal(result.rightSourceAuthorUrl, 'https://www.pexels.com/@right-author');
     });
 
+    it('uses embedded media without making fallback requests', async () => {
+        let requestCount = 0;
+        const loader: WorldCupListMediaLoader = async () => {
+            requestCount += 1;
+            return undefined;
+        };
+        const item = {
+            ...createItem(),
+            reftMediaFile: media('embedded-left', 'left-author').data,
+            rightMediaFile: media('embedded-right', 'right-author').data,
+        };
+
+        const [result] = await mapWorldCupListMedia([item], loader);
+
+        assert.equal(requestCount, 0);
+        assert.equal(result.reftImgMediaFileNo, 'embedded-left');
+        assert.equal(result.rightImgMediaFileNo, 'embedded-right');
+    });
+
     it('preserves the existing shifted placement when only the left request rejects', async () => {
         const loader: WorldCupListMediaLoader = async (id) => {
             if (id === 10) throw new Error('left failed');

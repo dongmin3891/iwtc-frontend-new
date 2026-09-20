@@ -1,7 +1,8 @@
 import { ManagedMediaFile } from '../manage/persistedContent';
 
 export interface MediaMappableContent {
-    mediaFileId: number;
+    mediaFileId: number | null;
+    mediaFile?: ManagedMediaFile | null;
     imgUrl?: string;
     fileType?: string;
     videoStartTime?: string;
