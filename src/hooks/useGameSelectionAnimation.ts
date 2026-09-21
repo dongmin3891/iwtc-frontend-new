@@ -28,9 +28,11 @@ export const useGameSelectionAnimation = () => {
         ]);
     };
 
-    const resetSelectionAnimation = () => {
-        leftApi.set(RESTING_STYLE);
-        rightApi.set(RESTING_STYLE);
+    const resetSelectionAnimation = async () => {
+        await Promise.all([
+            ...leftApi.start({ to: RESTING_STYLE, immediate: true }),
+            ...rightApi.start({ to: RESTING_STYLE, immediate: true }),
+        ]);
     };
 
     return {

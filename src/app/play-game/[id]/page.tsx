@@ -114,7 +114,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             return;
         }
         await animateSelection(selectedIndex);
-        resetSelectionAnimation();
+        await resetSelectionAnimation();
         if (continuation.type === 'request-next-round') {
             setSelectRound(continuation.nextRound);
             requestGameRound(
