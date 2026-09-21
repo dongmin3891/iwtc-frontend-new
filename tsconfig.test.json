@@ -44,7 +44,12 @@
         "src/interfaces/models/world-cup/WcListData.ts",
         "src/interfaces/models/world-cup/WcListData.test.ts",
         "src/lib/react-query/queryKeys.ts",
-        "src/lib/react-query/queryKeys.test.ts"
+        "src/lib/react-query/queryKeys.test.ts",
+        "src/features/traffic/cloudflareTraffic.ts",
+        "src/features/traffic/cloudflareTraffic.test.ts",
+        "src/features/traffic/trafficStats.ts",
+        "src/features/traffic/trafficRoute.ts",
+        "src/features/traffic/trafficRoute.test.ts"
     ],
     "exclude": []
 }

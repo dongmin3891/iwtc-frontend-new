@@ -116,6 +116,15 @@ npm run build
 - 신규 업로드 원본 제한·WebP 썸네일 생성과 기존 이미지 backfill은 일반 사용자 제작 기능을 다시 공개하거나 이미지 전송량이 실제 병목으로 확인될 때 진행한다.
 - 현재 공개 화면은 내장 미디어 응답으로 메타데이터 N+1이 제거됐고 Next 이미지 최적화도 동작하므로 즉시 구현하지 않는다.
 
+### 2026-09-21 Cloudflare 방문 통계
+
+- 홈 Hero에 `오늘 방문`과 오늘을 포함한 `최근 7일 방문`을 표시한다. 값은 Cloudflare GraphQL Analytics의 `httpRequestsAdaptiveGroups.sum.visits`이며 `clientRequestHTTPHost: "iwtc.ddongmy.com"`, `requestSource: "eyeball"`로 제한한다.
+- KST 자정을 UTC 시각으로 변환하고 하나의 GraphQL 요청에서 `today`, `lastSevenDays` alias를 함께 조회한다.
+- Cloudflare Token과 Zone ID는 `/api/traffic` 서버 Route에서만 읽는다. Kubernetes Deployment는 `web-app-cloudflare` Secret의 `CLOUDFLARE_ANALYTICS_API_TOKEN`, `CLOUDFLARE_ZONE_ID` key를 선택적으로 연결하며 값 자체는 Git에 저장하지 않는다.
+- 외부 응답과 공개 API 응답은 기존 Yup으로 런타임 검증한다. 성공 결과만 pod별 메모리에 10분간 저장하고 동시 최초 요청은 하나로 합친다. 오류 응답은 원문이나 토큰 없이 `503 unavailable`로 반환하며 화면은 통계를 숨긴다.
+- 로딩 카드와 unavailable 자리의 높이를 동일하게 유지해 레이아웃 이동을 막는다. 390px 모바일에서 모의 성공 응답으로 숫자·CTA 배치를 확인했다.
+- `npm run typecheck`, 76개 단위 테스트, `npm run lint`, `npm run build`가 통과했다. 린트·빌드에는 기존 관리 화면 `<img>` 경고 2건과 Browserslist 갱신 안내만 남아 있다.
+
 ## Pexels 출처 표시 보완 (완료)
 
 ### 일반 사용자 제작 기능 운영 정책

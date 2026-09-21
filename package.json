@@ -10,7 +10,7 @@
         "start": "next start -p 8080",
         "lint": "next lint",
         "typecheck": "tsc --noEmit",
-        "test": "tsc -p tsconfig.test.json && node --test .test-dist/utils/*.test.js .test-dist/domain/game/*.test.js .test-dist/domain/home/*.test.js .test-dist/domain/manage/*.test.js .test-dist/services/*.test.js .test-dist/interfaces/models/world-cup/*.test.js .test-dist/lib/react-query/*.test.js"
+        "test": "tsc -p tsconfig.test.json && node --test .test-dist/utils/*.test.js .test-dist/domain/game/*.test.js .test-dist/domain/home/*.test.js .test-dist/domain/manage/*.test.js .test-dist/services/*.test.js .test-dist/interfaces/models/world-cup/*.test.js .test-dist/lib/react-query/*.test.js .test-dist/features/traffic/*.test.js"
     },
     "dependencies": {
         "@hookform/resolvers": "^3.3.1",

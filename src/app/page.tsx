@@ -1,4 +1,5 @@
 import HydratedWCList from '@/components/home/HydratedWCList';
+import TrafficSummary from '@/features/traffic/TrafficSummary';
 
 const Home = () => {
     return (
@@ -20,13 +21,16 @@ const Home = () => {
                             선명해집니다.
                         </p>
                     </div>
-                    <a
-                        href="#world-cups"
-                        className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-violet-50"
-                    >
-                        월드컵 둘러보기
-                        <span aria-hidden="true">↓</span>
-                    </a>
+                    <div className="flex w-full max-w-sm flex-col gap-4 lg:w-80">
+                        <TrafficSummary />
+                        <a
+                            href="#world-cups"
+                            className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-violet-50"
+                        >
+                            월드컵 둘러보기
+                            <span aria-hidden="true">↓</span>
+                        </a>
+                    </div>
                 </div>
             </section>
             <HydratedWCList />
