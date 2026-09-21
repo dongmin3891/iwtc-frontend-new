@@ -1,35 +1,36 @@
-import { useSpring } from '@react-spring/web';
+import { useReducedMotion, useSpring } from '@react-spring/web';
+import { createGameSelectionAnimationTargets } from '@/domain/game/selectionAnimation';
+
+const RESTING_STYLE = {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+};
 
 export const useGameSelectionAnimation = () => {
+    const prefersReducedMotion = useReducedMotion() === true;
     const [leftStyle, leftApi] = useSpring(() => ({
-        from: { x: 0 },
-        to: { x: 0 },
-        loop: {
-            reset: true,
-        },
+        from: RESTING_STYLE,
+        to: RESTING_STYLE,
     }));
     const [rightStyle, rightApi] = useSpring(() => ({
-        from: { x: 0 },
-        to: { x: 0 },
-        loop: {
-            reset: true,
-        },
+        from: RESTING_STYLE,
+        to: RESTING_STYLE,
     }));
 
-    const animateSelection = (selectedIndex: 0 | 1) => {
-        if (selectedIndex === 0) {
-            leftApi.start({ to: { x: 400 } });
-            rightApi.start({ to: { x: 2000 } });
-            return;
-        }
+    const animateSelection = async (selectedIndex: 0 | 1) => {
+        const targets = createGameSelectionAnimationTargets(selectedIndex, prefersReducedMotion);
+        const config = { duration: targets.duration };
 
-        rightApi.start({ to: { x: -400 } });
-        leftApi.start({ to: { x: -2000 } });
+        await Promise.all([
+            ...leftApi.start({ to: targets.left, config }),
+            ...rightApi.start({ to: targets.right, config }),
+        ]);
     };
 
     const resetSelectionAnimation = () => {
-        rightApi.start({ to: { x: 0 } });
-        leftApi.start({ to: { x: 0 } });
+        leftApi.set(RESTING_STYLE);
+        rightApi.set(RESTING_STYLE);
     };
 
     return {

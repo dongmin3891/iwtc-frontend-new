@@ -25,6 +25,8 @@
         "src/domain/game/play.test.ts",
         "src/domain/game/mediaFile.ts",
         "src/domain/game/mediaFile.test.ts",
+        "src/domain/game/selectionAnimation.ts",
+        "src/domain/game/selectionAnimation.test.ts",
         "src/domain/home/worldCupListMedia.ts",
         "src/domain/home/worldCupListMedia.test.ts",
         "src/domain/manage/content.ts",

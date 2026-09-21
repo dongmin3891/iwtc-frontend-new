@@ -86,7 +86,6 @@ const Page = ({ params }: { params: { id: string } }) => {
     const handleSelection = async (selectedIndex: 0 | 1) => {
         if (isSwapping) return;
         setIsSwapping(true);
-        animateSelection(selectedIndex);
         const [firstContent, secondContent] = gameList;
         const { loserContentId, winnerContentId, nextExcludedContents } = resolveGameSelection(
             [firstContent, secondContent],
@@ -110,23 +109,23 @@ const Page = ({ params }: { params: { id: string } }) => {
                 winnerContentId,
                 loserContentId,
             });
+            await animateSelection(selectedIndex);
             router.push(createGameClearPath(worldCupId, crypto.randomUUID(), initialRound, updatedRankContents));
             return;
         }
-        setTimeout(() => {
-            resetSelectionAnimation();
-            if (continuation.type === 'request-next-round') {
-                setSelectRound(continuation.nextRound);
-                requestGameRound(
-                    continuation.nextRound,
-                    continuation.excludedContentsIds,
-                    continuation.initialRound
-                );
-            } else {
-                applyGameList(continuation.remainingContents, initialRound);
-            }
-            setIsSwapping(false);
-        }, 1000);
+        await animateSelection(selectedIndex);
+        resetSelectionAnimation();
+        if (continuation.type === 'request-next-round') {
+            setSelectRound(continuation.nextRound);
+            requestGameRound(
+                continuation.nextRound,
+                continuation.excludedContentsIds,
+                continuation.initialRound
+            );
+        } else {
+            applyGameList(continuation.remainingContents, initialRound);
+        }
+        setIsSwapping(false);
     };
 
     if (!isPlay) {
