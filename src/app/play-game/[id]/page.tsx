@@ -35,7 +35,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     const [selectRound, setSelectRound] = useState<number>(0);
     const [isPlay, setIsPlay] = useState<boolean>(false);
     const [gameList, setGameList] = useState<GameContentView[]>([]);
-    const [saveClickContents, setSaveClickContents] = useState<number[]>([]);
+    const [roundWinners, setRoundWinners] = useState<GameContentView[]>([]);
     const [rankContents, setRankContents] = useState<GameRankContents>({
         firstWinnerContentsId: 0,
         secondWinnerContentsId: 0,
@@ -63,14 +63,14 @@ const Page = ({ params }: { params: { id: string } }) => {
         },
     });
 
-    const requestGameRound = (round: number, excludedContentsIds: number[], initialRound: number) => {
-        getGame.mutate(createWorldCupGameRequest(worldCupId, round, excludedContentsIds, initialRound));
+    const requestGameRound = (round: number, initialRound: number) => {
+        getGame.mutate(createWorldCupGameRequest(worldCupId, round, initialRound));
     };
 
     const handleRoundSelect = (round: number) => {
         setSelectRound(round);
         initializeProgress(round);
-        requestGameRound(round, [], round);
+        requestGameRound(round, round);
     };
 
     useEffect(() => {
@@ -87,19 +87,19 @@ const Page = ({ params }: { params: { id: string } }) => {
         if (isSwapping) return;
         setIsSwapping(true);
         const [firstContent, secondContent] = gameList;
-        const { loserContentId, winnerContentId, nextExcludedContents } = resolveGameSelection(
+        const winnerContent = gameList[selectedIndex];
+        const { loserContentId, winnerContentId } = resolveGameSelection(
             [firstContent, secondContent],
-            selectedIndex,
-            saveClickContents
+            selectedIndex
         );
         const continuation = resolveGameContinuation(
             gameList,
             selectRound,
-            nextExcludedContents,
+            roundWinners,
+            winnerContent,
             initialRound
         );
         // selectRound가 2이면 결승
-        setSaveClickContents(nextExcludedContents);
         if (selectRound === 4) {
             setRankContents(updateGameRankContents(rankContents, selectRound, { winnerContentId, loserContentId }));
         }
@@ -115,14 +115,12 @@ const Page = ({ params }: { params: { id: string } }) => {
         }
         await animateSelection(selectedIndex);
         await resetSelectionAnimation();
-        if (continuation.type === 'request-next-round') {
+        if (continuation.type === 'start-next-round') {
             setSelectRound(continuation.nextRound);
-            requestGameRound(
-                continuation.nextRound,
-                continuation.excludedContentsIds,
-                continuation.initialRound
-            );
+            setRoundWinners([]);
+            applyGameList(continuation.nextRoundContents, continuation.initialRound);
         } else {
+            setRoundWinners(continuation.roundWinners);
             applyGameList(continuation.remainingContents, initialRound);
         }
         setIsSwapping(false);

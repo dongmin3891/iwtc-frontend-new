@@ -2,7 +2,6 @@ export interface WorldCupGameRequest {
     worldcupId: number;
     currentRound: number;
     sliceContents: number;
-    excludeContentsIds?: string;
     initialRound: number;
 }
 
@@ -13,7 +12,6 @@ interface SelectableGameContent {
 export interface GameSelectionResult {
     winnerContentId: number;
     loserContentId: number;
-    nextExcludedContents: number[];
 }
 
 export interface GameRankContents {
@@ -26,17 +24,16 @@ export interface GameRankContents {
 export type GameContinuation<T> =
     | { type: 'finish' }
     | {
-          type: 'request-next-round';
+          type: 'start-next-round';
           nextRound: number;
-          excludedContentsIds: number[];
+          nextRoundContents: T[];
           initialRound: number;
       }
-    | { type: 'show-next-pair'; remainingContents: T[] };
+    | { type: 'show-next-pair'; remainingContents: T[]; roundWinners: T[] };
 
 export const resolveGameSelection = (
     contents: readonly [SelectableGameContent, SelectableGameContent, ...SelectableGameContent[]],
-    selectedIndex: 0 | 1,
-    excludedContentsIds: number[]
+    selectedIndex: 0 | 1
 ): GameSelectionResult => {
     const loserIndex = selectedIndex === 0 ? 1 : 0;
     const winnerContentId = contents[selectedIndex].contentsId;
@@ -45,25 +42,27 @@ export const resolveGameSelection = (
     return {
         winnerContentId,
         loserContentId,
-        nextExcludedContents: excludedContentsIds.concat(loserContentId),
     };
 };
 
 export const resolveGameContinuation = <T>(
     contents: T[],
     currentRound: number,
-    excludedContentsIds: number[],
+    roundWinners: T[],
+    selectedWinner: T,
     initialRound: number
 ): GameContinuation<T> => {
     if (currentRound === 2) {
         return { type: 'finish' };
     }
 
+    const nextRoundWinners = roundWinners.concat(selectedWinner);
+
     if (contents.length === 2) {
         return {
-            type: 'request-next-round',
+            type: 'start-next-round',
             nextRound: currentRound / 2,
-            excludedContentsIds,
+            nextRoundContents: nextRoundWinners,
             initialRound,
         };
     }
@@ -71,6 +70,7 @@ export const resolveGameContinuation = <T>(
     return {
         type: 'show-next-pair',
         remainingContents: contents.slice(2),
+        roundWinners: nextRoundWinners,
     };
 };
 
@@ -108,12 +108,10 @@ export const createGameClearPath = (
 export const createWorldCupGameRequest = (
     worldCupId: number,
     currentRound: number,
-    excludedContentsIds: number[],
     initialRound: number
 ): WorldCupGameRequest => ({
     worldcupId: worldCupId,
     currentRound,
     sliceContents: 1,
-    excludeContentsIds: excludedContentsIds.length === 0 ? undefined : excludedContentsIds.join(','),
     initialRound,
 });

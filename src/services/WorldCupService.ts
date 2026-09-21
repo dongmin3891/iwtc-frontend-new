@@ -50,12 +50,10 @@ export const worldCupGamePlay = async ({
     worldcupId,
     currentRound,
     sliceContents,
-    excludeContentsIds,
 }: WorldCupGameRequest): Promise<WorldCupGameResponse> => {
     const param = {
         currentRound,
         sliceContents,
-        excludeContentsIds,
     };
     const response = await ajaxGet<WorldCupGameResponse>(`/world-cups/${worldcupId}/contents`, { params: param });
     return response.data;
