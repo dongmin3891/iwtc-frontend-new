@@ -1,9 +1,9 @@
-import { createRoundLabels, getRoundProgressIncrement } from '@/domain/game/round';
+import { createRoundLabels, getGameProgressPercentage } from '@/domain/game/round';
 import { useEffect, useState } from 'react';
 
 export const useGameProgress = () => {
     const [initialRound, setInitialRound] = useState(0);
-    const [progressPercentage, setProgressPercentage] = useState(0);
+    const [completedMatchCount, setCompletedMatchCount] = useState(0);
     const [roundLabels, setRoundLabels] = useState<Record<string, number>>({});
 
     useEffect(() => {
@@ -12,17 +12,20 @@ export const useGameProgress = () => {
         }
     }, [initialRound]);
 
-    const advanceProgress = (round: number) => {
-        if (round !== 0) {
-            setProgressPercentage((previous) => previous + getRoundProgressIncrement(round));
-        }
+    const initializeProgress = (round: number) => {
+        setInitialRound(round);
+        setCompletedMatchCount(0);
+    };
+
+    const advanceProgress = () => {
+        setCompletedMatchCount((previous) => Math.min(previous + 1, Math.max(initialRound - 1, 0)));
     };
 
     return {
         initialRound,
-        progressPercentage,
+        progressPercentage: getGameProgressPercentage(initialRound, completedMatchCount),
         roundLabels,
-        initializeProgress: setInitialRound,
+        initializeProgress,
         advanceProgress,
     };
 };

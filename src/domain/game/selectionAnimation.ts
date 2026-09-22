@@ -10,6 +10,19 @@ export type GameSelectionAnimationTargets = {
     right: CandidateAnimationTarget;
 };
 
+export type CandidateSelectionState = 'idle' | 'selected' | 'dismissed';
+
+export const getCandidateSelectionState = (
+    selectedIndex: 0 | 1 | null,
+    candidateIndex: 0 | 1
+): CandidateSelectionState => {
+    if (selectedIndex === null) {
+        return 'idle';
+    }
+
+    return selectedIndex === candidateIndex ? 'selected' : 'dismissed';
+};
+
 export const GAME_SELECTION_ANIMATION_DURATION = 320;
 
 const RESTING_TARGET: CandidateAnimationTarget = {

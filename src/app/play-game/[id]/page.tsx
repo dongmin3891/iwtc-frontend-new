@@ -19,6 +19,7 @@ import { WorldCupGameContent } from '@/interfaces/models/world-cup/WcGameData';
 import { useGameSelectionAnimation } from '@/hooks/useGameSelectionAnimation';
 import GameCandidateMedia from '@/components/game/GameCandidateMedia';
 import { useGameProgress } from '@/hooks/useGameProgress';
+import { getCandidateSelectionState } from '@/domain/game/selectionAnimation';
 
 type GameContentView = MappedMediaContent<WorldCupGameContent>;
 
@@ -43,23 +44,23 @@ const Page = ({ params }: { params: { id: string } }) => {
         fourthWinnerContentsId: 0,
     });
     const [isSwapping, setIsSwapping] = useState<boolean>(false);
+    const [selectedCandidateIndex, setSelectedCandidateIndex] = useState<0 | 1 | null>(null);
     const [isLoding, setIsLoding] = useState<boolean>(true);
     const { leftStyle, rightStyle, animateSelection, resetSelectionAnimation } = useGameSelectionAnimation();
     const { initialRound, progressPercentage, roundLabels, initializeProgress, advanceProgress } =
         useGameProgress();
 
-    const applyGameList = (list: GameContentView[], initialRound: number) => {
+    const applyGameList = (list: GameContentView[]) => {
         setGameList(list);
-
-        advanceProgress(initialRound);
     };
 
     const getGame = useMutation(worldCupGamePlay, {
-        onSuccess: async (data, variables) => {
+        onSuccess: async (data) => {
             setIsPlay(true);
+            setSelectedCandidateIndex(null);
             const list = await mappingMediaFile(data.data.contentsList);
             setIsLoding(false);
-            applyGameList(list, variables.initialRound);
+            applyGameList(list);
         },
     });
 
@@ -69,6 +70,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
     const handleRoundSelect = (round: number) => {
         setSelectRound(round);
+        setSelectedCandidateIndex(null);
         initializeProgress(round);
         requestGameRound(round, round);
     };
@@ -85,6 +87,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
     const handleSelection = async (selectedIndex: 0 | 1) => {
         if (isSwapping) return;
+        setSelectedCandidateIndex(selectedIndex);
         setIsSwapping(true);
         const [firstContent, secondContent] = gameList;
         const winnerContent = gameList[selectedIndex];
@@ -99,6 +102,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             winnerContent,
             initialRound
         );
+        advanceProgress();
         // selectRound가 2이면 결승
         if (selectRound === 4) {
             setRankContents(updateGameRankContents(rankContents, selectRound, { winnerContentId, loserContentId }));
@@ -115,13 +119,14 @@ const Page = ({ params }: { params: { id: string } }) => {
         }
         await animateSelection(selectedIndex);
         await resetSelectionAnimation();
+        setSelectedCandidateIndex(null);
         if (continuation.type === 'start-next-round') {
             setSelectRound(continuation.nextRound);
             setRoundWinners([]);
-            applyGameList(continuation.nextRoundContents, continuation.initialRound);
+            applyGameList(continuation.nextRoundContents);
         } else {
             setRoundWinners(continuation.roundWinners);
-            applyGameList(continuation.remainingContents, initialRound);
+            applyGameList(continuation.remainingContents);
         }
         setIsSwapping(false);
     };
@@ -159,10 +164,13 @@ const Page = ({ params }: { params: { id: string } }) => {
         const remainingMatches = Math.ceil(gameList.length / 2);
         const visibleProgress = Math.min(progressPercentage, 100);
         const isSelectionLocked = isSwapping || getGame.isLoading;
+        const selectedGame = selectedCandidateIndex === null ? null : gameList[selectedCandidateIndex];
+        const leftSelectionState = getCandidateSelectionState(selectedCandidateIndex, 0);
+        const rightSelectionState = getCandidateSelectionState(selectedCandidateIndex, 1);
         const gameStatusLabel = getGame.isLoading
             ? '다음 대결 준비 중'
-            : isSwapping
-              ? '선택 반영 중'
+            : selectedGame
+              ? `${selectedGame.name} 선택 반영 중`
               : '선택 대기 중';
 
         return (
@@ -186,7 +194,11 @@ const Page = ({ params }: { params: { id: string } }) => {
                             </h1>
                             <p className="mt-2 text-sm text-slate-400">더 마음이 가는 후보를 선택하세요.</p>
                         </div>
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                        <div
+                            className="flex items-center gap-2 text-xs font-bold text-slate-400"
+                            aria-live="polite"
+                            aria-atomic="true"
+                        >
                             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
                             {gameStatusLabel}
                         </div>
@@ -225,14 +237,25 @@ const Page = ({ params }: { params: { id: string } }) => {
                     <section className="relative mt-8 grid gap-8 md:grid-cols-2 md:gap-5" aria-label="후보 선택">
                         <animated.button
                             type="button"
-                            className="group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-slate-900 text-left shadow-2xl shadow-black/30 transition hover:-translate-y-1 hover:border-violet-300/50 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0"
+                            className={`group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border bg-slate-900 text-left shadow-2xl shadow-black/30 transition hover:-translate-y-1 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0 ${
+                                leftSelectionState === 'selected'
+                                    ? 'border-violet-200 ring-4 ring-violet-400/30'
+                                    : 'border-white/10 hover:border-violet-300/50'
+                            }`}
                             style={{ ...leftStyle }}
                             onClick={() => handleSelection(0)}
                             disabled={isSelectionLocked}
                             aria-label={`${leftGame.name} 선택`}
+                            aria-pressed={leftSelectionState === 'selected'}
                         >
                             <GameCandidateMedia content={leftGame} attributionPosition="right" />
                             <span className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/5 to-transparent" />
+                            {leftSelectionState === 'selected' && (
+                                <span className="pointer-events-none absolute left-4 top-4 z-30 inline-flex items-center gap-1.5 rounded-full border border-violet-100/50 bg-violet-500 px-3 py-1.5 text-xs font-black text-white shadow-lg shadow-violet-950/40">
+                                    <span aria-hidden="true">✓</span>
+                                    선택됨
+                                </span>
+                            )}
                             <span className="absolute inset-x-0 bottom-0 z-10 p-5 sm:p-7">
                                 <span className="text-[11px] font-black tracking-[0.16em] text-violet-200">CANDIDATE A</span>
                                 <span className="mt-2 block text-2xl font-black tracking-[-0.025em] sm:text-3xl">
@@ -250,14 +273,25 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                         <animated.button
                             type="button"
-                            className="group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border border-white/10 bg-slate-900 text-left shadow-2xl shadow-black/30 transition hover:-translate-y-1 hover:border-sky-300/50 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0"
+                            className={`group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border bg-slate-900 text-left shadow-2xl shadow-black/30 transition hover:-translate-y-1 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0 ${
+                                rightSelectionState === 'selected'
+                                    ? 'border-sky-200 ring-4 ring-sky-400/30'
+                                    : 'border-white/10 hover:border-sky-300/50'
+                            }`}
                             style={{ ...rightStyle }}
                             onClick={() => handleSelection(1)}
                             disabled={isSelectionLocked}
                             aria-label={`${rightGame.name} 선택`}
+                            aria-pressed={rightSelectionState === 'selected'}
                         >
                             <GameCandidateMedia content={rightGame} attributionPosition="left" />
                             <span className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/5 to-transparent" />
+                            {rightSelectionState === 'selected' && (
+                                <span className="pointer-events-none absolute right-4 top-4 z-30 inline-flex items-center gap-1.5 rounded-full border border-sky-100/50 bg-sky-500 px-3 py-1.5 text-xs font-black text-white shadow-lg shadow-sky-950/40">
+                                    <span aria-hidden="true">✓</span>
+                                    선택됨
+                                </span>
+                            )}
                             <span className="absolute inset-x-0 bottom-0 z-10 p-5 text-right sm:p-7">
                                 <span className="text-[11px] font-black tracking-[0.16em] text-sky-200">CANDIDATE B</span>
                                 <span className="mt-2 block text-2xl font-black tracking-[-0.025em] sm:text-3xl">

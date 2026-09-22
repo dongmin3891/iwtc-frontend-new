@@ -3,7 +3,22 @@ import { describe, it } from 'node:test';
 import {
     createGameSelectionAnimationTargets,
     GAME_SELECTION_ANIMATION_DURATION,
+    getCandidateSelectionState,
 } from './selectionAnimation';
+
+describe('getCandidateSelectionState', () => {
+    it('keeps both candidates idle before a selection', () => {
+        assert.equal(getCandidateSelectionState(null, 0), 'idle');
+        assert.equal(getCandidateSelectionState(null, 1), 'idle');
+    });
+
+    it('distinguishes the selected and dismissed candidates', () => {
+        assert.equal(getCandidateSelectionState(0, 0), 'selected');
+        assert.equal(getCandidateSelectionState(0, 1), 'dismissed');
+        assert.equal(getCandidateSelectionState(1, 0), 'dismissed');
+        assert.equal(getCandidateSelectionState(1, 1), 'selected');
+    });
+});
 
 describe('createGameSelectionAnimationTargets', () => {
     it('moves a selected left candidate toward the center and dismisses the right candidate', () => {
