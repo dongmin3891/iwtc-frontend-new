@@ -10,6 +10,12 @@ export type GameSelectionAnimationTargets = {
     right: CandidateAnimationTarget;
 };
 
+export type CandidateSwapAnimationTargets = {
+    duration: number;
+    hidden: CandidateAnimationTarget;
+    visible: CandidateAnimationTarget;
+};
+
 export type CandidateSelectionState = 'idle' | 'selected' | 'dismissed';
 
 export const getCandidateSelectionState = (
@@ -24,11 +30,34 @@ export const getCandidateSelectionState = (
 };
 
 export const GAME_SELECTION_ANIMATION_DURATION = 320;
+export const GAME_CANDIDATE_ENTER_DURATION = 180;
 
 const RESTING_TARGET: CandidateAnimationTarget = {
     x: 0,
     opacity: 1,
     scale: 1,
+};
+
+const HIDDEN_SWAP_TARGET: CandidateAnimationTarget = {
+    x: 0,
+    opacity: 0,
+    scale: 0.985,
+};
+
+export const createCandidateSwapAnimationTargets = (reducedMotion: boolean): CandidateSwapAnimationTargets => {
+    if (reducedMotion) {
+        return {
+            duration: 0,
+            hidden: RESTING_TARGET,
+            visible: RESTING_TARGET,
+        };
+    }
+
+    return {
+        duration: GAME_CANDIDATE_ENTER_DURATION,
+        hidden: HIDDEN_SWAP_TARGET,
+        visible: RESTING_TARGET,
+    };
 };
 
 export const createGameSelectionAnimationTargets = (

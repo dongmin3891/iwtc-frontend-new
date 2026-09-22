@@ -46,7 +46,8 @@ const Page = ({ params }: { params: { id: string } }) => {
     const [isSwapping, setIsSwapping] = useState<boolean>(false);
     const [selectedCandidateIndex, setSelectedCandidateIndex] = useState<0 | 1 | null>(null);
     const [isLoding, setIsLoding] = useState<boolean>(true);
-    const { leftStyle, rightStyle, animateSelection, resetSelectionAnimation } = useGameSelectionAnimation();
+    const { leftStyle, rightStyle, animateSelection, prepareCandidateSwap, revealCandidates } =
+        useGameSelectionAnimation();
     const { initialRound, progressPercentage, roundLabels, initializeProgress, advanceProgress } =
         useGameProgress();
 
@@ -118,7 +119,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             return;
         }
         await animateSelection(selectedIndex);
-        await resetSelectionAnimation();
+        await prepareCandidateSwap();
         setSelectedCandidateIndex(null);
         if (continuation.type === 'start-next-round') {
             setSelectRound(continuation.nextRound);
@@ -128,6 +129,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             setRoundWinners(continuation.roundWinners);
             applyGameList(continuation.remainingContents);
         }
+        await revealCandidates();
         setIsSwapping(false);
     };
 
@@ -171,7 +173,9 @@ const Page = ({ params }: { params: { id: string } }) => {
             ? '다음 대결 준비 중'
             : selectedGame
               ? `${selectedGame.name} 선택 반영 중`
-              : '선택 대기 중';
+              : isSwapping
+                ? '다음 대결 준비 중'
+                : '선택 대기 중';
 
         return (
             <main className="relative isolate min-h-[calc(100vh-72px)] overflow-hidden bg-slate-950 px-5 py-8 text-white sm:px-8 lg:px-10 lg:py-10">
@@ -237,7 +241,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     <section className="relative mt-8 grid gap-8 md:grid-cols-2 md:gap-5" aria-label="후보 선택">
                         <animated.button
                             type="button"
-                            className={`group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border bg-slate-900 text-left shadow-2xl shadow-black/30 transition hover:-translate-y-1 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0 ${
+                            className={`group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border bg-slate-900 text-left shadow-2xl shadow-black/30 transition-[border-color,box-shadow] duration-200 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0 ${
                                 leftSelectionState === 'selected'
                                     ? 'border-violet-200 ring-4 ring-violet-400/30'
                                     : 'border-white/10 hover:border-violet-300/50'
@@ -273,7 +277,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                         <animated.button
                             type="button"
-                            className={`group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border bg-slate-900 text-left shadow-2xl shadow-black/30 transition hover:-translate-y-1 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0 ${
+                            className={`group relative isolate aspect-[4/3] min-h-[260px] overflow-hidden rounded-[28px] border bg-slate-900 text-left shadow-2xl shadow-black/30 transition-[border-color,box-shadow] duration-200 focus-visible:z-20 disabled:cursor-wait md:aspect-[16/10] md:min-h-0 ${
                                 rightSelectionState === 'selected'
                                     ? 'border-sky-200 ring-4 ring-sky-400/30'
                                     : 'border-white/10 hover:border-sky-300/50'

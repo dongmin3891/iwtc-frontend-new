@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+    createCandidateSwapAnimationTargets,
     createGameSelectionAnimationTargets,
+    GAME_CANDIDATE_ENTER_DURATION,
     GAME_SELECTION_ANIMATION_DURATION,
     getCandidateSelectionState,
 } from './selectionAnimation';
@@ -42,5 +44,23 @@ describe('createGameSelectionAnimationTargets', () => {
         assert.equal(targets.duration, 0);
         assert.deepEqual(targets.left, { x: 0, opacity: 1, scale: 1 });
         assert.deepEqual(targets.right, { x: 0, opacity: 1, scale: 1 });
+    });
+});
+
+describe('createCandidateSwapAnimationTargets', () => {
+    it('keeps new candidates hidden until their enter animation starts', () => {
+        const targets = createCandidateSwapAnimationTargets(false);
+
+        assert.equal(targets.duration, GAME_CANDIDATE_ENTER_DURATION);
+        assert.deepEqual(targets.hidden, { x: 0, opacity: 0, scale: 0.985 });
+        assert.deepEqual(targets.visible, { x: 0, opacity: 1, scale: 1 });
+    });
+
+    it('swaps candidates immediately when reduced motion is requested', () => {
+        const targets = createCandidateSwapAnimationTargets(true);
+
+        assert.equal(targets.duration, 0);
+        assert.deepEqual(targets.hidden, { x: 0, opacity: 1, scale: 1 });
+        assert.deepEqual(targets.visible, { x: 0, opacity: 1, scale: 1 });
     });
 });
