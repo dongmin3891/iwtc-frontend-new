@@ -1,24 +1,11 @@
 'use client';
 import Link from 'next/link';
-import React, { MouseEvent, useContext, useState } from 'react';
+import React, { useState } from 'react';
 import SignInUpButton from '../header/SignInUpButton';
-import { useAuth } from '@/providers/AuthProvider';
-import { PopupContext } from '@/providers/PopupProvider';
-import AlertPopup from '../popup/AlertPopup';
 import { VERSION } from '@/consts/Version';
 
 const Header = () => {
-    const { isLoggedIn, user } = useAuth();
-    const { showPopup, hidePopup } = useContext(PopupContext);
-    const userId = user?.id ?? '';
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    const handleLoginBaseService = (event: MouseEvent<HTMLAnchorElement>) => {
-        if (!isLoggedIn) {
-            event.preventDefault();
-            showPopup(<AlertPopup message="로그인이 필요한 서비스입니다." hidePopup={hidePopup} />);
-        }
-    };
 
     return (
         <nav className="sticky top-0 z-[60] border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
@@ -63,28 +50,7 @@ const Header = () => {
                         isMenuOpen ? 'flex' : 'hidden'
                     } w-full flex-col gap-2 border-t border-slate-100 py-4 lg:flex lg:w-auto lg:flex-row lg:items-center lg:gap-1 lg:border-0 lg:py-0`}
                 >
-                    <div className="flex flex-col lg:flex-row lg:items-center">
-                        <Link
-                            href={`/members/${userId}/games`}
-                            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
-                            onClick={(event) => {
-                                handleLoginBaseService(event);
-                                setIsMenuOpen(false);
-                            }}
-                        >
-                            내 월드컵
-                        </Link>
-                        <Link
-                            href="https://stingy-sort-6b7.notion.site/36bf75ec4a0d4c888852a4d7bb13ff76?pvs=4"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            패치노트
-                        </Link>
-                    </div>
-                    <div className="mt-2 border-t border-slate-100 pt-4 lg:ml-3 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+                    <div onClick={() => setIsMenuOpen(false)}>
                         <SignInUpButton />
                     </div>
                 </div>

@@ -82,19 +82,19 @@ const RegisterForm = () => {
                         CREATE YOUR ACCOUNT
                     </span>
                     <h1 className="mt-6 max-w-xl text-6xl font-black leading-[1.08] tracking-[-0.05em]">
-                        나만의 월드컵을
+                        함께 즐기는 월드컵을
                         <br />
-                        만들어 보세요.
+                        시작해 보세요.
                     </h1>
                     <p className="mt-6 max-w-lg text-lg leading-8 text-slate-300">
-                        계정을 만들면 주제와 후보를 직접 구성하고, 언제든 다시 찾아 관리할 수 있어요.
+                        계정을 만들고 다양한 주제의 월드컵을 플레이하며 결과에 대한 의견을 나눠보세요.
                     </p>
 
                     <ol className="mt-10 max-w-lg space-y-3" aria-label="회원가입 후 이용 단계">
                         {[
                             ['01', '계정 만들기', '간단한 정보로 IWTC 계정을 시작하세요.'],
-                            ['02', '월드컵 구성', '주제와 설명을 정하고 후보를 추가하세요.'],
-                            ['03', '공유하고 즐기기', '완성한 월드컵을 친구들과 플레이하세요.'],
+                            ['02', '월드컵 선택', '관심 있는 주제와 참가 라운드를 선택하세요.'],
+                            ['03', '결과 나누기', '게임을 마치고 다른 이용자와 의견을 나눠보세요.'],
                         ].map(([number, title, description]) => (
                             <li key={number} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.06] p-4">
                                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-400/15 text-xs font-black text-violet-200">

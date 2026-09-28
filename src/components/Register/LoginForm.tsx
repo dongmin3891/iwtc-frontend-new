@@ -93,19 +93,19 @@ const LoginForm = () => {
                         반가워요.
                     </h1>
                     <p className="mt-6 max-w-lg text-lg leading-8 text-slate-300">
-                        로그인하면 내가 만든 월드컵을 관리하고, 후보를 추가하거나 수정할 수 있어요.
+                        IWTC 계정으로 로그인하고 다양한 이상형 월드컵을 계속 즐겨보세요.
                     </p>
 
                     <div className="mt-10 grid max-w-lg grid-cols-2 gap-3">
                         <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
                             <span className="grid h-9 w-9 place-items-center rounded-xl bg-violet-400/15 text-lg">✦</span>
-                            <p className="mt-4 text-sm font-bold">월드컵 관리</p>
-                            <p className="mt-1 text-xs leading-5 text-slate-500">내가 만든 게임을 한곳에서 확인하세요.</p>
+                            <p className="mt-4 text-sm font-bold">게임 참여</p>
+                            <p className="mt-1 text-xs leading-5 text-slate-500">관심 있는 주제를 골라 우승자를 선택하세요.</p>
                         </div>
                         <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
                             <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-400/15 text-lg">↗</span>
-                            <p className="mt-4 text-sm font-bold">후보 업데이트</p>
-                            <p className="mt-1 text-xs leading-5 text-slate-500">이미지와 영상 후보를 편하게 관리하세요.</p>
+                            <p className="mt-4 text-sm font-bold">의견 나누기</p>
+                            <p className="mt-1 text-xs leading-5 text-slate-500">결과 페이지에서 다른 이용자와 이야기를 나눠보세요.</p>
                         </div>
                     </div>
                 </section>
@@ -117,7 +117,7 @@ const LoginForm = () => {
                     <div className="mt-3 lg:mt-0">
                         <p className="text-sm font-bold text-violet-200">IWTC 계정</p>
                         <h2 className="mt-2 text-3xl font-black tracking-[-0.04em]">로그인</h2>
-                        <p className="mt-3 text-sm leading-6 text-slate-400">계정 정보를 입력하고 내 월드컵으로 돌아가세요.</p>
+                        <p className="mt-3 text-sm leading-6 text-slate-400">계정 정보를 입력하고 IWTC를 계속 이용하세요.</p>
                     </div>
 
                     <form className="mt-8 space-y-5" onSubmit={handleSubmit(handleLogin)} noValidate>

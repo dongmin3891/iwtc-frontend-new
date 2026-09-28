@@ -12,13 +12,13 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
     metadataBase: new URL('https://iwtc.ddongmy.com'),
     title: 'IWTC | 이상형 월드컵',
-    description: '간편하게 만들고 함께 즐기는 이상형 월드컵',
+    description: '다양한 후보를 비교하고 우승자를 선택하는 이상형 월드컵',
     icons: {
         icon: '/images/favicon.ico',
     },
     openGraph: {
         title: '나의 이상형이 궁금할 땐?',
-        description: '쉽게 게임하고 간편하게 만들어요!',
+        description: '마음에 드는 후보를 선택하고 나만의 우승자를 확인해보세요.',
         url: 'https://iwtc.ddongmy.com',
         siteName: 'IWTC',
         images: [
