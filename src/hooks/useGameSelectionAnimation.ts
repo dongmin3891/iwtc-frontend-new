@@ -10,6 +10,13 @@ const RESTING_STYLE = {
     scale: 1,
 };
 
+const getCandidateLayout = () =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+        ? 'stacked'
+        : 'side-by-side';
+
+const wait = (duration: number) => new Promise<void>((resolve) => window.setTimeout(resolve, duration));
+
 export const useGameSelectionAnimation = () => {
     const prefersReducedMotion = useReducedMotion() === true;
     const [leftStyle, leftApi] = useSpring(() => ({
@@ -22,13 +29,22 @@ export const useGameSelectionAnimation = () => {
     }));
 
     const animateSelection = async (selectedIndex: 0 | 1) => {
-        const targets = createGameSelectionAnimationTargets(selectedIndex, prefersReducedMotion);
+        const targets = createGameSelectionAnimationTargets(
+            selectedIndex,
+            prefersReducedMotion,
+            getCandidateLayout()
+        );
         const config = { duration: targets.duration };
 
         await Promise.all([
-            ...leftApi.start({ to: targets.left, config }),
-            ...rightApi.start({ to: targets.right, config }),
+            ...leftApi.start({ to: targets.left, config, immediate: targets.duration === 0 }),
+            ...rightApi.start({ to: targets.right, config, immediate: targets.duration === 0 }),
         ]);
+
+        const remainingFeedbackDuration = targets.feedbackDuration - targets.duration;
+        if (remainingFeedbackDuration > 0) {
+            await wait(remainingFeedbackDuration);
+        }
     };
 
     const prepareCandidateSwap = async () => {

@@ -6,6 +6,7 @@ export type CandidateAnimationTarget = {
 
 export type GameSelectionAnimationTargets = {
     duration: number;
+    feedbackDuration: number;
     left: CandidateAnimationTarget;
     right: CandidateAnimationTarget;
 };
@@ -17,6 +18,7 @@ export type CandidateSwapAnimationTargets = {
 };
 
 export type CandidateSelectionState = 'idle' | 'selected' | 'dismissed';
+export type CandidateLayout = 'side-by-side' | 'stacked';
 
 export const getCandidateSelectionState = (
     selectedIndex: 0 | 1 | null,
@@ -30,6 +32,7 @@ export const getCandidateSelectionState = (
 };
 
 export const GAME_SELECTION_ANIMATION_DURATION = 320;
+export const GAME_REDUCED_MOTION_FEEDBACK_DURATION = 180;
 export const GAME_CANDIDATE_ENTER_DURATION = 180;
 
 const RESTING_TARGET: CandidateAnimationTarget = {
@@ -62,13 +65,35 @@ export const createCandidateSwapAnimationTargets = (reducedMotion: boolean): Can
 
 export const createGameSelectionAnimationTargets = (
     selectedIndex: 0 | 1,
-    reducedMotion: boolean
+    reducedMotion: boolean,
+    layout: CandidateLayout = 'side-by-side'
 ): GameSelectionAnimationTargets => {
     if (reducedMotion) {
         return {
             duration: 0,
+            feedbackDuration: GAME_REDUCED_MOTION_FEEDBACK_DURATION,
             left: RESTING_TARGET,
             right: RESTING_TARGET,
+        };
+    }
+
+    if (layout === 'stacked') {
+        const selectedTarget: CandidateAnimationTarget = {
+            x: 0,
+            opacity: 1,
+            scale: 1.015,
+        };
+        const dismissedTarget: CandidateAnimationTarget = {
+            x: 0,
+            opacity: 0,
+            scale: 0.96,
+        };
+
+        return {
+            duration: GAME_SELECTION_ANIMATION_DURATION,
+            feedbackDuration: GAME_SELECTION_ANIMATION_DURATION,
+            left: selectedIndex === 0 ? selectedTarget : dismissedTarget,
+            right: selectedIndex === 0 ? dismissedTarget : selectedTarget,
         };
     }
 
@@ -85,6 +110,7 @@ export const createGameSelectionAnimationTargets = (
 
     return {
         duration: GAME_SELECTION_ANIMATION_DURATION,
+        feedbackDuration: GAME_SELECTION_ANIMATION_DURATION,
         left: selectedIndex === 0 ? selectedTarget : dismissedTarget,
         right: selectedIndex === 0 ? dismissedTarget : selectedTarget,
     };

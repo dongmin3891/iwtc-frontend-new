@@ -4,6 +4,7 @@ import {
     createCandidateSwapAnimationTargets,
     createGameSelectionAnimationTargets,
     GAME_CANDIDATE_ENTER_DURATION,
+    GAME_REDUCED_MOTION_FEEDBACK_DURATION,
     GAME_SELECTION_ANIMATION_DURATION,
     getCandidateSelectionState,
 } from './selectionAnimation';
@@ -27,6 +28,7 @@ describe('createGameSelectionAnimationTargets', () => {
         const targets = createGameSelectionAnimationTargets(0, false);
 
         assert.equal(targets.duration, GAME_SELECTION_ANIMATION_DURATION);
+        assert.equal(targets.feedbackDuration, GAME_SELECTION_ANIMATION_DURATION);
         assert.deepEqual(targets.left, { x: 32, opacity: 1, scale: 1.02 });
         assert.deepEqual(targets.right, { x: 120, opacity: 0, scale: 0.98 });
     });
@@ -38,10 +40,19 @@ describe('createGameSelectionAnimationTargets', () => {
         assert.deepEqual(targets.right, { x: -32, opacity: 1, scale: 1.02 });
     });
 
-    it('removes movement and delay when reduced motion is requested', () => {
+    it('uses a fade and scale transition without horizontal movement for stacked candidates', () => {
+        const targets = createGameSelectionAnimationTargets(0, false, 'stacked');
+
+        assert.equal(targets.duration, GAME_SELECTION_ANIMATION_DURATION);
+        assert.deepEqual(targets.left, { x: 0, opacity: 1, scale: 1.015 });
+        assert.deepEqual(targets.right, { x: 0, opacity: 0, scale: 0.96 });
+    });
+
+    it('removes movement but keeps non-motion feedback visible when reduced motion is requested', () => {
         const targets = createGameSelectionAnimationTargets(0, true);
 
         assert.equal(targets.duration, 0);
+        assert.equal(targets.feedbackDuration, GAME_REDUCED_MOTION_FEEDBACK_DURATION);
         assert.deepEqual(targets.left, { x: 0, opacity: 1, scale: 1 });
         assert.deepEqual(targets.right, { x: 0, opacity: 1, scale: 1 });
     });

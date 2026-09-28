@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useQueryGetWorldCupGameRound, worldCupGamePlay } from '@/services/WorldCupService';
 import RoundPopup from '@/components/popup/RoundPopup';
 import { useMutation } from '@tanstack/react-query';
@@ -44,6 +44,7 @@ const Page = ({ params }: { params: { id: string } }) => {
         fourthWinnerContentsId: 0,
     });
     const [isSwapping, setIsSwapping] = useState<boolean>(false);
+    const selectionLockRef = useRef(false);
     const [selectedCandidateIndex, setSelectedCandidateIndex] = useState<0 | 1 | null>(null);
     const [isLoding, setIsLoding] = useState<boolean>(true);
     const { leftStyle, rightStyle, animateSelection, prepareCandidateSwap, revealCandidates } =
@@ -70,6 +71,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     };
 
     const handleRoundSelect = (round: number) => {
+        selectionLockRef.current = false;
         setSelectRound(round);
         setSelectedCandidateIndex(null);
         initializeProgress(round);
@@ -87,7 +89,8 @@ const Page = ({ params }: { params: { id: string } }) => {
     }, []);
 
     const handleSelection = async (selectedIndex: 0 | 1) => {
-        if (isSwapping) return;
+        if (selectionLockRef.current || isSwapping) return;
+        selectionLockRef.current = true;
         setSelectedCandidateIndex(selectedIndex);
         setIsSwapping(true);
         const [firstContent, secondContent] = gameList;
@@ -130,6 +133,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             applyGameList(continuation.remainingContents);
         }
         await revealCandidates();
+        selectionLockRef.current = false;
         setIsSwapping(false);
     };
 
