@@ -119,6 +119,7 @@ CLOUDFLARE_ZONE_ID=...
 | `/play-clear/[...id]` | 게임 결과, 랭킹 및 댓글 | 불필요 |
 | `/sign-in` | 로그인 | 불필요 |
 | `/sign-up` | 회원가입 | 불필요 |
+| `/updates` | 저장소의 `CHANGELOG.md`로 생성되는 서비스 업데이트 | 불필요 |
 | `/api/health` | Kubernetes 상태 확인 | 불필요 |
 | `/api/traffic` | 서버 전용 Cloudflare 방문 통계 중계 | 불필요 |
 
@@ -156,7 +157,7 @@ npm test
 npm run build
 ```
 
-현재 기준선은 83개 테스트, 28개 suite입니다. 관리 화면 미리보기의 기존 `<img>` 린트 경고 2건과 Browserslist 데이터 갱신 안내가 남아 있습니다.
+현재 기준선은 85개 테스트, 29개 suite입니다. 관리 화면 미리보기의 기존 `<img>` 린트 경고 2건과 Browserslist 데이터 갱신 안내가 남아 있습니다.
 
 ## 배포
 
@@ -180,7 +181,7 @@ Kubernetes 리소스는 `iwtc` namespace에서 실행되며 Traefik Ingress를 �
 - `package-lock.json`의 루트 패키지 버전
 - `src/consts/Version.ts`
 
-기존 Notion 패치노트는 현재 서비스와 맞지 않아 화면에서 제거했습니다. 새 패치노트가 준비되기 전까지 별도 외부 링크를 제공하지 않습니다.
+기존 Notion 패치노트 대신 저장소의 `CHANGELOG.md`를 사용합니다. 빌드 시 `/updates` 정적 페이지로 생성되며 헤더의 `업데이트` 링크에서 확인할 수 있습니다.
 
 ## 개발 시 주의사항
 

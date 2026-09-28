@@ -37,6 +37,8 @@
         "src/domain/manage/mediaInput.test.ts",
         "src/domain/manage/persistedContent.ts",
         "src/domain/manage/persistedContent.test.ts",
+        "src/domain/updates/changelog.ts",
+        "src/domain/updates/changelog.test.ts",
         "src/services/axiosError.ts",
         "src/services/axiosError.test.ts",
         "src/services/replyPermission.ts",

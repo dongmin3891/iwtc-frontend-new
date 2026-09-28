@@ -50,6 +50,13 @@ const Header = () => {
                         isMenuOpen ? 'flex' : 'hidden'
                     } w-full flex-col gap-2 border-t border-slate-100 py-4 lg:flex lg:w-auto lg:flex-row lg:items-center lg:gap-1 lg:border-0 lg:py-0`}
                 >
+                    <Link
+                        href="/updates"
+                        className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-700"
+                        onClick={() => setIsMenuOpen(false)}
+                    >
+                        업데이트
+                    </Link>
                     <div onClick={() => setIsMenuOpen(false)}>
                         <SignInUpButton />
                     </div>
