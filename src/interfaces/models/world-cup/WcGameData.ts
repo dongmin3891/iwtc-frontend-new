@@ -1,10 +1,25 @@
 export interface WorldCupRoundData {
     worldCupTitle: string;
+    worldCupDescription: string;
     rounds: number[];
 }
 
 export interface WorldCupRoundResponse {
     data: WorldCupRoundData;
+}
+
+export interface WorldCupDetailData {
+    worldCupId: number;
+    title: string;
+    description: string;
+    candidateCount: number;
+    playCount: number;
+    commentCount: number;
+    rounds: number[];
+}
+
+export interface WorldCupDetailResponse {
+    data: WorldCupDetailData;
 }
 
 export interface WorldCupGameContent {

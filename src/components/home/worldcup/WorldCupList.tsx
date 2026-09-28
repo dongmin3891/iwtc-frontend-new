@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { WCListViewData } from '@/interfaces/models/world-cup/WcListData';
 import MediaAttribution from '@/components/game/MediaAttribution';
 import SmoothImage from '@/components/common/SmoothImage';
+import { formatCount, getPlayableRoundLabel } from '@/domain/home/worldCupStats';
 
 interface WorldCupListProps {
     wcList: WCListViewData;
@@ -33,7 +34,16 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
         rightSourceAuthorUrl,
         description,
         worldCupId,
+        candidateCount,
+        playCount,
+        commentCount,
     } = wcList;
+    const roundLabel = getPlayableRoundLabel(candidateCount);
+    const statistics = [
+        roundLabel,
+        playCount === undefined ? undefined : `${formatCount(playCount)}회 플레이`,
+        commentCount === undefined ? undefined : `댓글 ${formatCount(commentCount)}`,
+    ].filter((item): item is string => Boolean(item));
 
     const renderPreview = (
         fileType: string,
@@ -75,8 +85,8 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
     return (
         <article className="group relative min-w-0 overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_12px_35px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1.5 hover:border-violet-200 hover:shadow-[0_20px_45px_rgba(79,70,229,0.14)]">
             <Link
-                href={`/play-game/${worldCupId}`}
-                aria-label={`${gameTitle} 월드컵 시작하기`}
+                href={`/world-cups/${worldCupId}`}
+                aria-label={`${gameTitle} 월드컵 정보, 순위와 댓글 보기`}
                 className="absolute inset-0 z-10 rounded-[28px] focus:outline-none focus-visible:ring-4 focus-visible:ring-violet-400/40"
             />
             <div className="relative grid aspect-[16/10] grid-cols-2 overflow-hidden bg-slate-100">
@@ -145,9 +155,28 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
                         →
                     </span>
                 </div>
-                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                    <span className="text-[11px] font-black tracking-[0.14em] text-violet-600">START GAME</span>
-                    <span className="text-xs font-semibold text-slate-400">클릭해서 시작</span>
+                {statistics.length > 0 && (
+                    <ul className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs font-bold text-slate-500" aria-label="월드컵 통계">
+                        {statistics.map((statistic) => (
+                            <li key={statistic} className="flex items-center gap-3 before:h-1 before:w-1 before:rounded-full before:bg-violet-300 first:before:hidden">
+                                {statistic}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                <div className="relative z-20 mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
+                    <Link
+                        href={`/play-game/${worldCupId}`}
+                        className="rounded-xl bg-violet-600 px-3 py-2.5 text-center text-xs font-black text-white transition hover:bg-violet-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-violet-300/40"
+                    >
+                        바로 시작
+                    </Link>
+                    <Link
+                        href={`/world-cups/${worldCupId}`}
+                        className="rounded-xl bg-slate-100 px-3 py-2.5 text-center text-xs font-black text-slate-700 transition hover:bg-slate-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-300/50"
+                    >
+                        순위·댓글
+                    </Link>
                 </div>
             </div>
         </article>

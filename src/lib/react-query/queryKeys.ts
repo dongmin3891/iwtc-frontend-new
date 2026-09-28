@@ -1,4 +1,5 @@
 export const worldCupQueryKeys = {
+    detail: (worldCupId: number) => ['wcDetail', worldCupId] as const,
     rounds: (worldCupId: number) => ['wcRounds', worldCupId] as const,
     rank: (worldCupId: number) => ['AllRankList', worldCupId] as const,
 };

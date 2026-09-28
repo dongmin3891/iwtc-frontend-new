@@ -4,6 +4,7 @@ import { manageWorldCupQueryKeys, replyQueryKeys, worldCupQueryKeys } from './qu
 
 describe('React Query keys', () => {
     it('preserves the existing world cup keys', () => {
+        assert.deepEqual(worldCupQueryKeys.detail(10), ['wcDetail', 10]);
         assert.deepEqual(worldCupQueryKeys.rounds(10), ['wcRounds', 10]);
         assert.deepEqual(worldCupQueryKeys.rank(10), ['AllRankList', 10]);
         assert.notDeepEqual(worldCupQueryKeys.rank(10), worldCupQueryKeys.rank(20));

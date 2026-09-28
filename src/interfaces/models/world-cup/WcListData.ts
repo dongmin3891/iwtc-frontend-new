@@ -8,6 +8,9 @@ export interface WCListDataType {
     // rightImgPath: string;
     worldCupId: number;
     gameTitle: string;
+    candidateCount?: number;
+    playCount?: number;
+    commentCount?: number;
     reftImgMediaFileNo: number | null;
     reftMediaFile?: ManagedMediaFile | null;
     rightImgMediaFileNo: number | null;
@@ -43,6 +46,9 @@ interface WCListApiItem {
     mediaFile2?: ManagedMediaFile | null;
     worldCupId: number;
     title: string;
+    candidateCount?: number;
+    playCount?: number;
+    commentCount?: number;
 }
 
 export interface WCListPageable {
@@ -94,5 +100,8 @@ export const mapWCListData = (data: WCListApiItem): WCListDataType => {
         // rightImgPath: data.filePath2,
         worldCupId: data.worldCupId,
         gameTitle: data.title,
+        candidateCount: data.candidateCount,
+        playCount: data.playCount,
+        commentCount: data.commentCount,
     };
 };

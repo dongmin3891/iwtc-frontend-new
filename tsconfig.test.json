@@ -29,6 +29,8 @@
         "src/domain/game/selectionAnimation.test.ts",
         "src/domain/home/worldCupListMedia.ts",
         "src/domain/home/worldCupListMedia.test.ts",
+        "src/domain/home/worldCupStats.ts",
+        "src/domain/home/worldCupStats.test.ts",
         "src/domain/manage/content.ts",
         "src/domain/manage/content.test.ts",
         "src/domain/manage/save.ts",

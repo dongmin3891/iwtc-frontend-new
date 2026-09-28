@@ -15,6 +15,9 @@ describe('loadWCListData', () => {
                     mediaFileId2: 20,
                     worldCupId: 30,
                     title: 'title',
+                    candidateCount: 16,
+                    playCount: 1284,
+                    commentCount: 23,
                 },
             ],
             pageable: {
@@ -35,6 +38,9 @@ describe('loadWCListData', () => {
                     rightImgMediaFileNo: 20,
                     worldCupId: 30,
                     gameTitle: 'title',
+                    candidateCount: 16,
+                    playCount: 1284,
+                    commentCount: 23,
                 },
             ],
             pageable: {

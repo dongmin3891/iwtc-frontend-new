@@ -28,6 +28,7 @@ export const useQueryGetReplyList = (worldcupId: number, offset: number) => {
         replyQueryKeys.list(worldcupId, offset),
         () => worldCupGameReplyList(worldcupId, offset),
         {
+            enabled: Number.isInteger(worldcupId) && worldcupId > 0,
             retry: 0,
             refetchOnWindowFocus: false,
             staleTime: 1000,

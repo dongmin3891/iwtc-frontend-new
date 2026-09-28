@@ -6,10 +6,29 @@ import { WorldCupGameRequest } from '@/domain/game/play';
 import { worldCupQueryKeys } from '@/lib/react-query/queryKeys';
 import {
     WorldCupClearResponse,
+    WorldCupDetailResponse,
     WorldCupGameResponse,
     WorldCupRankResponse,
     WorldCupRoundResponse,
 } from '@/interfaces/models/world-cup/WcGameData';
+
+export const useQueryGetWorldCupDetail = (worldcupId: number) => {
+    return useQuery<WorldCupDetailResponse, Error>(
+        worldCupQueryKeys.detail(worldcupId),
+        () => worldCupDetail(worldcupId),
+        {
+            enabled: Number.isInteger(worldcupId) && worldcupId > 0,
+            retry: 0,
+            refetchOnWindowFocus: false,
+            staleTime: 3000,
+        }
+    );
+};
+
+export const worldCupDetail = async (worldcupId: number) => {
+    const response = await ajaxGet<WorldCupDetailResponse>(`/world-cups/${worldcupId}`);
+    return response.data;
+};
 
 export const worldCupAllList = async (
     page: number,

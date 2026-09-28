@@ -71,7 +71,6 @@ const RankList = ({
                         className="object-cover"
                         src={imgUrl}
                         fill
-                        priority={rank === 1}
                         sizes="112px"
                         alt={contentsName}
                     />
