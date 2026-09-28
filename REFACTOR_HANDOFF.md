@@ -111,10 +111,27 @@ npm run build
 - 로컬 수정본은 WebKit iPhone 15과 서로 다른 이미지 4개의 모의 API로 재검증했다. 선택 후 다음 두 카드는 모두 `opacity: 1`, `transform: none`이며 실제 캡처에서도 두 이미지가 표시된다.
 - 타입 검사, 린트, 테스트 69개와 프로덕션 빌드가 다시 통과했다. 회귀 수정 커밋의 자동 배포가 끝난 뒤 운영 WebKit에서 실제 픽셀과 computed style을 다시 확인한다.
 
-### 2. 이미지 저장·전달 최적화 (보류)
+### 2. 홈 첫 진입 이미지 지연 개선 (다음 작업)
 
-- 신규 업로드 원본 제한·WebP 썸네일 생성과 기존 이미지 backfill은 일반 사용자 제작 기능을 다시 공개하거나 이미지 전송량이 실제 병목으로 확인될 때 진행한다.
-- 현재 공개 화면은 내장 미디어 응답으로 메타데이터 N+1이 제거됐고 Next 이미지 최적화도 동작하므로 즉시 구현하지 않는다.
+- 2026-09-28 운영 홈에서 약 38KB WebP 응답도 3~5초 동안 대기하는 현상을 분석했다. 다운로드 용량이나 브라우저 connection 수가 아니라 `/_next/image`의 TTFB가 대부분을 차지했다.
+- 같은 이미지 10개 동시 요청은 평균 약 0.6초였지만 서로 다른 `w=640` 이미지 10개의 첫 동시 요청은 평균 약 2.4초였고, 반복할수록 약 1.8초 → 0.88초 → 0.75초로 줄었다. 서로 다른 cache key의 cold image 최적화 비용과 cache warming 패턴으로 판단한다.
+- frontend는 K3s에서 2 replicas로 동작하며 각 Pod의 `/app/.next/cache/images`가 서로 다른 로컬 캐시다. Cloudflare 응답은 `cf-cache-status: DYNAMIC`, Next 응답은 `x-nextjs-cache: STALE`, `cache-control: public, max-age=60, must-revalidate`로 확인됐다. 따라서 방문자 요청이 origin과 Pod별 Image Optimizer까지 내려가면서 cold path를 반복할 수 있다.
+- 상세 분석 문서: [38KB 이미지가 왜 5초를 기다렸을까: next/image 병목과 K3s 2-Pod 캐시를 추적한 회고](https://app.notion.com/p/3e7151dc9c728136bed3ed510b4964bd)
+
+지금은 아래 한 단계만 먼저 진행한다.
+
+1. Cloudflare Cache Rule에서 hostname `iwtc.ddongmy.com`, path `/_next/image`만 `Eligible for cache`로 설정하고 Edge TTL을 우선 1일로 지정한다.
+2. cache key의 query string을 반드시 유지한다. `url`, `w`, `q`가 다른 요청을 같은 결과로 취급하면 안 된다.
+3. 같은 `/_next/image?...` URL을 연속 요청해 첫 요청 `MISS`, 두 번째 요청 `HIT` 여부와 TTFB를 비교한다. 적용 전후에는 동일 URL·동일 Cloudflare PoP 조건을 사용한다.
+4. 새 시크릿 창의 홈 첫 진입에서 여러 이미지의 Pending 시간과 RSC 지연이 함께 줄었는지 확인한다.
+
+판단 기준:
+
+- 두 번째 요청이 실제 `cf-cache-status: HIT`가 되고 홈 체감 지연이 사라지면 이 단계에서 종료한다.
+- Edge Cache 적용 후에도 지연이 남을 때만 첫 카드 좌·우 이미지에 모두 전달되는 `priority`를 대표 이미지 하나로 줄이고, `images.minimumCacheTTL` 조정을 보조책으로 검토한다.
+- cold 요청 중 Pod CPU가 500m limit에 붙거나 throttling이 확인될 때만 CPU limit 상향을 검토한다. 리소스를 근거 없이 먼저 늘리지 않는다.
+- 640px WebP 사전 생성과 기존 이미지 backfill은 Edge Cache로 충분히 해결되지 않을 때 진행하는 장기 구조 변경이다. 장기적으로는 320/640/1280 WebP variant를 업로드·자동화 시점에 만들고 CDN에서 직접 제공해 방문자 요청 경로에서 Sharp 변환을 제거한다.
+- 두 Pod의 `.next/cache/images` 공유 PVC는 Next 내부 캐시 구조 결합과 동시 read/write 운영 복잡도가 커서 우선순위를 낮춘다.
 
 ### 2026-09-21 Cloudflare 방문 통계
 
