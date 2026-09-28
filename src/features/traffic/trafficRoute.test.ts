@@ -3,6 +3,24 @@ import { describe, it } from 'node:test';
 import { createTrafficResponse } from './trafficRoute';
 
 describe('createTrafficResponse', () => {
+    it('returns an available response without caching it', async () => {
+        const response = await createTrafficResponse(async () => ({
+            status: 'available',
+            todayVisits: 12,
+            lastSevenDaysVisits: 34,
+            checkedAt: '2026-09-21T03:30:00.000Z',
+        }));
+
+        assert.equal(response.status, 200);
+        assert.equal(response.headers.get('Cache-Control'), 'no-store');
+        assert.deepEqual(await response.json(), {
+            status: 'available',
+            todayVisits: 12,
+            lastSevenDaysVisits: 34,
+            checkedAt: '2026-09-21T03:30:00.000Z',
+        });
+    });
+
     it('returns an unavailable response without exposing the upstream error', async () => {
         const originalConsoleError = console.error;
         console.error = () => undefined;

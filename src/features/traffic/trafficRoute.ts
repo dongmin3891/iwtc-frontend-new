@@ -1,7 +1,5 @@
 import { AvailableTrafficStats, UnavailableTrafficStats } from './trafficStats';
 
-const SUCCESS_CACHE_CONTROL = 'public, max-age=60, s-maxage=600, stale-while-revalidate=60';
-
 export async function createTrafficResponse(
     loadTrafficStats: () => Promise<AvailableTrafficStats>,
     now: () => Date = () => new Date()
@@ -11,7 +9,7 @@ export async function createTrafficResponse(
 
         return Response.json(trafficStats, {
             headers: {
-                'Cache-Control': SUCCESS_CACHE_CONTROL,
+                'Cache-Control': 'no-store',
             },
         });
     } catch (error) {

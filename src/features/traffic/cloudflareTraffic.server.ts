@@ -4,7 +4,6 @@ import { AvailableTrafficStats } from './trafficStats';
 
 const CLOUDFLARE_GRAPHQL_URL = 'https://api.cloudflare.com/client/v4/graphql';
 const TRAFFIC_HOSTNAME = 'iwtc.ddongmy.com';
-const TRAFFIC_CACHE_TTL_MS = 10 * 60 * 1_000;
 const TRAFFIC_REQUEST_TIMEOUT_MS = 10_000;
 
 const cloudflareTrafficEnvironmentSchema = yup
@@ -17,11 +16,6 @@ const cloudflareTrafficEnvironmentSchema = yup
 type CloudflareTrafficConfig = {
     apiToken: string;
     zoneId: string;
-};
-
-type CachedTrafficStats = {
-    expiresAt: number;
-    value: AvailableTrafficStats;
 };
 
 class CloudflareTrafficResponseError extends Error {
@@ -70,9 +64,6 @@ const trafficQuery = `
     }
   }
 `;
-
-let successfulCache: CachedTrafficStats | undefined;
-let inFlightRequest: Promise<AvailableTrafficStats> | undefined;
 
 function getCloudflareTrafficConfig(): CloudflareTrafficConfig {
     const environment = cloudflareTrafficEnvironmentSchema.validateSync(
@@ -134,25 +125,5 @@ async function requestCloudflareTrafficStats(): Promise<AvailableTrafficStats> {
 }
 
 export async function getCloudflareTrafficStats(): Promise<AvailableTrafficStats> {
-    const now = Date.now();
-
-    if (successfulCache && successfulCache.expiresAt > now) {
-        return successfulCache.value;
-    }
-
-    if (inFlightRequest) return inFlightRequest;
-
-    inFlightRequest = requestCloudflareTrafficStats()
-        .then((value) => {
-            successfulCache = {
-                value,
-                expiresAt: Date.now() + TRAFFIC_CACHE_TTL_MS,
-            };
-            return value;
-        })
-        .finally(() => {
-            inFlightRequest = undefined;
-        });
-
-    return inFlightRequest;
+    return requestCloudflareTrafficStats();
 }
