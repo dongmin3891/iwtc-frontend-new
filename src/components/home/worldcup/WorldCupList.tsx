@@ -1,9 +1,9 @@
 import CustomYoutubePlayer from '@/components/youtubePlayer/CustomYoutubePlayer';
 import { isMP4 } from '@/utils/common';
-import Image from 'next/image';
 import Link from 'next/link';
 import { WCListViewData } from '@/interfaces/models/world-cup/WcListData';
 import MediaAttribution from '@/components/game/MediaAttribution';
+import SmoothImage from '@/components/common/SmoothImage';
 
 interface WorldCupListProps {
     wcList: WCListViewData;
@@ -61,8 +61,8 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
         }
 
         return (
-            <Image
-                className="object-cover transition duration-500 group-hover:scale-105"
+            <SmoothImage
+                className="object-cover group-hover:scale-105"
                 src={mediaSource}
                 fill
                 priority={priority}

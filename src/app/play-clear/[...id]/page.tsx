@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 import Link from 'next/link';
 import RankListWrapper from '@/components/Rank/RankListWrapper';
 import ReplyRegisterForm from '@/components/reply/ReplyRegisterForm';
@@ -13,6 +12,7 @@ import CustomYoutubePlayer from '@/components/youtubePlayer/CustomYoutubePlayer'
 import { MappedMediaContent } from '@/domain/game/mediaFile';
 import { WorldCupClearContent } from '@/interfaces/models/world-cup/WcGameData';
 import MediaAttribution from '@/components/game/MediaAttribution';
+import SmoothImage from '@/components/common/SmoothImage';
 
 type ClearContentView = MappedMediaContent<WorldCupClearContent>;
 
@@ -42,7 +42,7 @@ const ResultMedia = ({ content, priority = false }: ResultMediaProps) => {
 
     return (
         <div className="relative h-full w-full">
-            <Image
+            <SmoothImage
                 className="object-cover"
                 src={content.imgUrl}
                 fill

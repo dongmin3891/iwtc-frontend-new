@@ -1,8 +1,8 @@
 import React from 'react';
-import Image from 'next/image';
 import CustomYoutubePlayer from '../youtubePlayer/CustomYoutubePlayer';
 import { isMP4 } from '@/utils/common';
 import MediaAttribution from '@/components/game/MediaAttribution';
+import SmoothImage from '@/components/common/SmoothImage';
 
 interface IProps {
     contentsName: string;
@@ -67,7 +67,7 @@ const RankList = ({
                 ) : isMP4(imgUrl) ? (
                     <video className="h-full w-full object-cover" src={imgUrl} muted />
                 ) : (
-                    <Image
+                    <SmoothImage
                         className="object-cover"
                         src={imgUrl}
                         fill

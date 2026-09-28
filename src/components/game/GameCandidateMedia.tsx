@@ -2,7 +2,7 @@ import CustomYoutubePlayer from '@/components/youtubePlayer/CustomYoutubePlayer'
 import { MappedMediaContent } from '@/domain/game/mediaFile';
 import { WorldCupGameContent } from '@/interfaces/models/world-cup/WcGameData';
 import { isMP4 } from '@/utils/common';
-import Image from 'next/image';
+import SmoothImage from '@/components/common/SmoothImage';
 import MediaAttribution from './MediaAttribution';
 
 interface GameCandidateMediaProps {
@@ -35,8 +35,8 @@ const GameCandidateMedia = ({ content, attributionPosition = 'right' }: GameCand
 
     return (
         <div className="relative h-full w-full">
-            <Image
-                className="object-cover transition duration-500 group-hover:scale-[1.03]"
+            <SmoothImage
+                className="object-cover group-hover:scale-[1.03]"
                 src={content.imgUrl}
                 fill
                 priority
