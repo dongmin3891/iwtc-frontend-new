@@ -21,7 +21,7 @@ const SmoothImage = ({ alt, className = '', onLoad, src, ...props }: ImageProps)
             {...props}
             alt={alt}
             src={src}
-            className={`transition-[opacity,filter,transform] duration-500 ease-out motion-reduce:transition-none ${
+            className={`transition-[opacity,filter,transform] duration-200 ease-out motion-reduce:transition-none ${
                 isLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'
             } ${className}`}
             onLoad={(event) => {

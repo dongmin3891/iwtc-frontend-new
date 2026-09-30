@@ -50,7 +50,8 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
         mediaSource: string,
         contentName: string,
         videoStartTime?: string,
-        videoPlayDuration?: number
+        videoPlayDuration?: number,
+        imagePriority = false
     ) => {
         if (fileType === 'INTERNET_VIDEO_URL') {
             return (
@@ -75,7 +76,7 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
                 className="object-cover group-hover:scale-105"
                 src={mediaSource}
                 fill
-                priority={priority}
+                priority={imagePriority}
                 sizes="(max-width: 640px) 50vw, (max-width: 1280px) 25vw, 200px"
                 alt={contentName || '후보 이미지'}
             />
@@ -96,7 +97,8 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
                         reftImgMediaFileNo,
                         reftContentName,
                         reftVideoStartTime,
-                        reftVideoPlayDuration
+                        reftVideoPlayDuration,
+                        priority
                     )}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-4 pb-3 pt-10">
                         <div className="mb-1 flex justify-end">

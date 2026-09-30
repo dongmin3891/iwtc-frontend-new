@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
+        minimumCacheTTL: 86400,
         domains: ['picsum.photos', 'www.youtube.com'],
         remotePatterns: [
             {
