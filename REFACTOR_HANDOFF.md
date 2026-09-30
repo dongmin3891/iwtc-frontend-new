@@ -131,7 +131,8 @@ npm run build
 - 타입 검사, 린트, 테스트 89개와 프로덕션 빌드를 통과했다. 린트·빌드에는 기존 관리 화면 `<img>` 경고 2건과 Browserslist 갱신 안내만 남아 있다.
 - 기능 커밋 `2e0536b`와 자동 배포 커밋 `91bad10`이 원격에 반영됐다.
 - 다음 프론트 작업은 모바일 첫 진입에서 화면 아래 카드까지 native lazy-loading 범위에 들어와 여러 이미지가 요청되는 현상을 별도 측정하는 것이다. 그래도 cold path가 크면 업로드·자동화 시점의 320/640/1280 WebP variant 생성과 CDN 직접 제공을 검토한다.
-- 상세 수치와 전후 캡처는 기존 [next/image 병목 회고](https://app.notion.com/p/3e7151dc9c728136bed3ed510b4964bd)의 `프론트엔드 개선 적용과 재측정` 절에 추가했다.
+- 원인 분석은 기존 [next/image 병목 회고](https://app.notion.com/p/3e7151dc9c728136bed3ed510b4964bd)에 유지했다.
+- 적용 내용, 전후 캡처와 측정 결과는 별도 [이미지 성능 개선 회고](https://app.notion.com/p/3eb151dc9c72817cbf65c85b2188b54f)에 정리했다. 현재는 초안 상태다.
 
 ### 2026-09-21 Cloudflare 방문 통계
 
