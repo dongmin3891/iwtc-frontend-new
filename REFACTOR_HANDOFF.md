@@ -1,7 +1,7 @@
 # iwtc-frontend 리팩터링 인수인계
 
 작성일: 2026-09-02
-최종 업데이트: 2026-09-28
+최종 업데이트: 2026-09-30
 
 ## 시작 지점
 
@@ -111,27 +111,27 @@ npm run build
 - 로컬 수정본은 WebKit iPhone 15과 서로 다른 이미지 4개의 모의 API로 재검증했다. 선택 후 다음 두 카드는 모두 `opacity: 1`, `transform: none`이며 실제 캡처에서도 두 이미지가 표시된다.
 - 타입 검사, 린트, 테스트 69개와 프로덕션 빌드가 다시 통과했다. 회귀 수정 커밋의 자동 배포가 끝난 뒤 운영 WebKit에서 실제 픽셀과 computed style을 다시 확인한다.
 
-### 2. 홈 첫 진입 이미지 지연 개선 (다음 작업)
+### 2. 홈 첫 진입 이미지 지연 개선 (1차 완료, 구조 개선 대기)
 
 - 2026-09-28 운영 홈에서 약 38KB WebP 응답도 3~5초 동안 대기하는 현상을 분석했다. 다운로드 용량이나 브라우저 connection 수가 아니라 `/_next/image`의 TTFB가 대부분을 차지했다.
 - 같은 이미지 10개 동시 요청은 평균 약 0.6초였지만 서로 다른 `w=640` 이미지 10개의 첫 동시 요청은 평균 약 2.4초였고, 반복할수록 약 1.8초 → 0.88초 → 0.75초로 줄었다. 서로 다른 cache key의 cold image 최적화 비용과 cache warming 패턴으로 판단한다.
 - frontend는 K3s에서 2 replicas로 동작하며 각 Pod의 `/app/.next/cache/images`가 서로 다른 로컬 캐시다. Cloudflare 응답은 `cf-cache-status: DYNAMIC`, Next 응답은 `x-nextjs-cache: STALE`, `cache-control: public, max-age=60, must-revalidate`로 확인됐다. 따라서 방문자 요청이 origin과 Pod별 Image Optimizer까지 내려가면서 cold path를 반복할 수 있다.
 - 상세 분석 문서: [38KB 이미지가 왜 5초를 기다렸을까: next/image 병목과 K3s 2-Pod 캐시를 추적한 회고](https://app.notion.com/p/3e7151dc9c728136bed3ed510b4964bd)
 
-지금은 아래 한 단계만 먼저 진행한다.
+#### 2026-09-30 프론트엔드 1차 개선과 운영 재측정
 
-1. Cloudflare Cache Rule에서 hostname `iwtc.ddongmy.com`, path `/_next/image`만 `Eligible for cache`로 설정하고 Edge TTL을 우선 1일로 지정한다.
-2. cache key의 query string을 반드시 유지한다. `url`, `w`, `q`가 다른 요청을 같은 결과로 취급하면 안 된다.
-3. 같은 `/_next/image?...` URL을 연속 요청해 첫 요청 `MISS`, 두 번째 요청 `HIT` 여부와 TTFB를 비교한다. 적용 전후에는 동일 URL·동일 Cloudflare PoP 조건을 사용한다.
-4. 새 시크릿 창의 홈 첫 진입에서 여러 이미지의 Pending 시간과 RSC 지연이 함께 줄었는지 확인한다.
-
-판단 기준:
-
-- 두 번째 요청이 실제 `cf-cache-status: HIT`가 되고 홈 체감 지연이 사라지면 이 단계에서 종료한다.
-- Edge Cache 적용 후에도 지연이 남을 때만 첫 카드 좌·우 이미지에 모두 전달되는 `priority`를 대표 이미지 하나로 줄이고, `images.minimumCacheTTL` 조정을 보조책으로 검토한다.
-- cold 요청 중 Pod CPU가 500m limit에 붙거나 throttling이 확인될 때만 CPU limit 상향을 검토한다. 리소스를 근거 없이 먼저 늘리지 않는다.
-- 640px WebP 사전 생성과 기존 이미지 backfill은 Edge Cache로 충분히 해결되지 않을 때 진행하는 장기 구조 변경이다. 장기적으로는 320/640/1280 WebP variant를 업로드·자동화 시점에 만들고 CDN에서 직접 제공해 방문자 요청 경로에서 Sharp 변환을 제거한다.
-- 두 Pod의 `.next/cache/images` 공유 PVC는 Next 내부 캐시 구조 결합과 동시 read/write 운영 복잡도가 커서 우선순위를 낮춘다.
+- Cloudflare Cache Rule은 추가하지 않았다. `next.config.js`의 `images.minimumCacheTTL`을 86,400초로 설정해 Pod가 생성한 이미지 결과를 1일간 재사용한다.
+- 첫 카드의 좌·우 이미지에 함께 전달되던 `priority`를 왼쪽 대표 이미지 한 장에만 적용한다.
+- 공통 `SmoothImage`의 로드 완료 transition을 500ms에서 200ms로 줄였다.
+- 운영 응답에서 `cache-control: public, max-age=60, must-revalidate`가 `max-age=86400`으로 바뀐 것을 확인했다. 같은 `w=1080&q=75` 요청의 후속 4회는 모두 `x-nextjs-cache: HIT`였다. Cloudflare는 계속 `DYNAMIC`이며 이번 변경 범위에 포함하지 않았다.
+- Lighthouse 12.8.2를 모바일·데스크톱 각각 3회 실행하고 중앙값을 비교했다.
+  - 모바일: 성능 79 → 81, FCP 2.126초 → 1.970초, LCP 4.574초 → 4.412초, Speed Index 3.429초 → 4.261초
+  - 데스크톱: 성능 97 → 99, FCP 0.820초 → 0.779초, LCP 0.869초 → 0.779초, Speed Index 0.876초 → 0.779초, CLS 0.0847 → 0
+- 두 환경의 LCP 요소는 카드 이미지가 아니라 Hero 제목이다. 이미지 설정만으로 LCP가 좋아졌다고 단정하지 않으며 모바일 Speed Index 악화와 실행 편차도 결과에 그대로 남긴다.
+- 타입 검사, 린트, 테스트 89개와 프로덕션 빌드를 통과했다. 린트·빌드에는 기존 관리 화면 `<img>` 경고 2건과 Browserslist 갱신 안내만 남아 있다.
+- 기능 커밋 `2e0536b`와 자동 배포 커밋 `91bad10`이 원격에 반영됐다.
+- 다음 프론트 작업은 모바일 첫 진입에서 화면 아래 카드까지 native lazy-loading 범위에 들어와 여러 이미지가 요청되는 현상을 별도 측정하는 것이다. 그래도 cold path가 크면 업로드·자동화 시점의 320/640/1280 WebP variant 생성과 CDN 직접 제공을 검토한다.
+- 상세 수치와 전후 캡처는 기존 [next/image 병목 회고](https://app.notion.com/p/3e7151dc9c728136bed3ed510b4964bd)의 `프론트엔드 개선 적용과 재측정` 절에 추가했다.
 
 ### 2026-09-21 Cloudflare 방문 통계
 
