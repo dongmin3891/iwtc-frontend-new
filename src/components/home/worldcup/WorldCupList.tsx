@@ -3,8 +3,8 @@ import { isMP4 } from '@/utils/common';
 import Link from 'next/link';
 import { WCListViewData } from '@/interfaces/models/world-cup/WcListData';
 import MediaAttribution from '@/components/game/MediaAttribution';
-import SmoothImage from '@/components/common/SmoothImage';
 import { formatCount, getPlayableRoundLabel } from '@/domain/home/worldCupStats';
+import DeferredWorldCupImage from './DeferredWorldCupImage';
 
 interface WorldCupListProps {
     wcList: WCListViewData;
@@ -72,7 +72,7 @@ const WorldCupList = ({ wcList, priority = false }: WorldCupListProps) => {
         }
 
         return (
-            <SmoothImage
+            <DeferredWorldCupImage
                 className="object-cover group-hover:scale-105"
                 src={mediaSource}
                 fill
