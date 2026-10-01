@@ -3,6 +3,7 @@ import getQueryClient from '@/lib/react-query/getQueryClient';
 import { worldCupAllList } from '@/services/WorldCupService';
 import WorldCup from './worldcup/WorldCupWrapper';
 import { mappingMediaFile2 } from '@/utils/common';
+import { HOME_WORLD_CUP_PAGE_SIZE } from '@/domain/home/worldCupPagination';
 
 export default async function HydratedWCList() {
     const queryClient = getQueryClient();
@@ -10,7 +11,13 @@ export default async function HydratedWCList() {
     await queryClient.prefetchInfiniteQuery(
         ['wclist', 'id', undefined, 'ALL'],
         async ({ pageParam = 0 }) => {
-            const data = await worldCupAllList(pageParam, 20, 'id', undefined, 'ALL');
+            const data = await worldCupAllList(
+                pageParam,
+                HOME_WORLD_CUP_PAGE_SIZE,
+                'id',
+                undefined,
+                'ALL'
+            );
             const transformedData = await mappingMediaFile2(data.list);
             return {
                 ...data,

@@ -9,6 +9,7 @@ import RankSelect from '@/components/button/RankSelect';
 import Order from '@/components/dropdown/Order';
 import { mappingMediaFile2 } from '@/utils/common';
 import { WCListViewData, WCListViewPage } from '@/interfaces/models/world-cup/WcListData';
+import { HOME_WORLD_CUP_PAGE_SIZE } from '@/domain/home/worldCupPagination';
 
 const WorldCupWrapper = () => {
     const [keyword, setKeyword] = useState<undefined | string>(undefined);
@@ -19,7 +20,13 @@ const WorldCupWrapper = () => {
         useInfiniteQuery<WCListViewPage>(
             ['wclist', order, keyword, rank],
             async ({ pageParam = 0 }) => {
-                const response = await worldCupAllList(pageParam, 20, order, keyword, rank);
+                const response = await worldCupAllList(
+                    pageParam,
+                    HOME_WORLD_CUP_PAGE_SIZE,
+                    order,
+                    keyword,
+                    rank
+                );
                 const newlist = await mappingMediaFile2(response.list);
                 return { ...response, list: newlist };
             },
