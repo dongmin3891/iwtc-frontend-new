@@ -134,6 +134,16 @@ npm run build
 - 원인 분석은 기존 [next/image 병목 회고](https://app.notion.com/p/3e7151dc9c728136bed3ed510b4964bd)에 유지했다.
 - 적용 내용, 전후 캡처와 측정 결과는 별도 [이미지 성능 개선 회고](https://app.notion.com/p/3eb151dc9c72817cbf65c85b2188b54f)에 정리했다. 현재는 초안 상태다.
 
+#### 2026-10-07 홈 초기 JavaScript 축소
+
+- 운영 `QueryProvider`에서 항상 렌더링하던 React Query Devtools를 개발 환경에서만 렌더링하도록 변경했다. 단독 효과를 동일 빌드로 비교했을 때 gzip 71B에 그쳐, 이를 성능 개선으로 과장하지 않고 초기 Axios 의존성까지 함께 추적했다.
+- 홈의 브라우저 목록 조회는 native fetch 전용 `PublicWorldCupService`로 분리했다. 서버의 초기 목록 프리패치는 기존 Axios 경로를 유지해 홈의 정적 생성과 API 계약을 바꾸지 않는다.
+- 인증 요약·로그아웃 서비스와 구버전 미디어 응답 fallback은 실제로 필요할 때만 동적 import한다. 현재 백엔드처럼 목록 응답에 미디어가 포함되면 방문자는 Axios 청크를 받지 않는다.
+- production 홈 진입 청크는 14개에서 12개, 전송 JS는 169,123B에서 147,362B(-12.9%), 원본 JS는 533,170B에서 470,305B(-11.8%)로 줄었다. Next 빌드의 홈 First Load JS는 154KB에서 135KB로 줄었다.
+- 이전 단계와 같은 Lighthouse 12.8.2 모바일 DevTools 조건 5회 중앙값에서 Performance 99, TBT 0ms, CLS 0.000055를 유지했다. Speed Index는 2.439초에서 2.369초(-2.9%)로 줄었고, FCP/LCP는 1.633초에서 1.721초(+5.3%)로 늘어 실행 편차와 함께 그대로 기록한다.
+- 로컬 production 모바일에서 초기 35개 집계와 카드 목록, `트램` 검색 후 1개 결과 갱신을 확인했다. Cloudflare Secret이 없는 로컬 `/api/traffic` 503 외 브라우저 기능 오류는 없었다.
+- 타입 검사, 린트, 테스트 91개와 production build를 통과했다. 린트·빌드에는 기존 관리 화면 `<img>` 경고 2건과 Browserslist 안내만 남아 있다.
+
 ### 2026-09-21 Cloudflare 방문 통계
 
 - 홈 Hero에 `오늘 방문`과 오늘을 포함한 `최근 7일 방문`을 표시한다. 값은 Cloudflare GraphQL Analytics의 `httpRequestsAdaptiveGroups.sum.visits`이며 `clientRequestHTTPHost: "iwtc.ddongmy.com"`, `requestSource: "eyeball"`로 제한한다.

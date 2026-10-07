@@ -1,5 +1,5 @@
 'use client';
-import { worldCupAllList } from '@/services/WorldCupService';
+import { worldCupAllList } from '@/services/PublicWorldCupService';
 import React, { useState } from 'react';
 import WorldCupList from './WorldCupList';
 import { useInfiniteQuery } from '@tanstack/react-query';

@@ -1,5 +1,4 @@
 'use client';
-import { userSignOut } from '@/services/MemberService';
 import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { localStorageClear } from '@/stores/LocalStore';
@@ -16,6 +15,7 @@ const SignInUpButton = () => {
     const onClickHandler = async (isLogin: boolean) => {
         if (isLogin) {
             try {
+                const { userSignOut } = await import('@/services/MemberService');
                 await userSignOut();
             } finally {
                 removeToken();

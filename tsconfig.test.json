@@ -31,6 +31,8 @@
         "src/domain/home/worldCupListMedia.test.ts",
         "src/domain/home/worldCupStats.ts",
         "src/domain/home/worldCupStats.test.ts",
+        "src/domain/home/worldCupListRequest.ts",
+        "src/domain/home/worldCupListRequest.test.ts",
         "src/domain/manage/content.ts",
         "src/domain/manage/content.test.ts",
         "src/domain/manage/save.ts",

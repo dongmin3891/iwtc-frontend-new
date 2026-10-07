@@ -1,9 +1,13 @@
-import { getMediaFileAPI } from '@/services/EtcService';
 import { MappedMediaContent, MediaMappableContent, mergeMediaFile } from '@/domain/game/mediaFile';
 import { mapWorldCupListMedia } from '@/domain/home/worldCupListMedia';
 import { WCListDataType, WCListViewData } from '@/interfaces/models/world-cup/WcListData';
 
 export { getMimeType, isMP4 } from './media';
+
+const getMediaFile = async (mediaFileId: number) => {
+    const { getMediaFileAPI } = await import('@/services/EtcService');
+    return getMediaFileAPI(mediaFileId);
+};
 
 export const mappingMediaFile = async <T extends MediaMappableContent>(
     gameList: T[]
@@ -16,7 +20,7 @@ export const mappingMediaFile = async <T extends MediaMappableContent>(
             return mergeMediaFile(item, undefined);
         }
         try {
-            const response = await getMediaFileAPI(item.mediaFileId); // API 호출
+            const response = await getMediaFile(item.mediaFileId); // API 호출
             return mergeMediaFile(item, response?.data);
         } catch (error) {
             return mergeMediaFile(item, undefined);
@@ -27,4 +31,4 @@ export const mappingMediaFile = async <T extends MediaMappableContent>(
 };
 
 export const mappingMediaFile2 = async (gameList: WCListDataType[]): Promise<WCListViewData[]> =>
-    mapWorldCupListMedia(gameList, getMediaFileAPI);
+    mapWorldCupListMedia(gameList, getMediaFile);

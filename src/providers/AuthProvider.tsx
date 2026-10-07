@@ -1,6 +1,5 @@
 'use client';
 
-import { userMeSummary } from '@/services/MemberService';
 import type { userInfo as UserInfo } from '@/interfaces/models/login/MemberData';
 import { getUserInfo, localStorageClear, setUserInfo } from '@/stores/LocalStore';
 import { getAccessToken, removeToken } from '@/utils/TokenManager';
@@ -34,6 +33,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             }
 
             try {
+                const { userMeSummary } = await import('@/services/MemberService');
                 const response = await userMeSummary(accessToken);
                 setUserInfo(response.data);
                 setUser(response.data);
