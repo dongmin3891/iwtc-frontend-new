@@ -1,3 +1,5 @@
+import { getSafePexelsUrl } from '@/utils/externalUrl';
+
 interface MediaAttributionProps {
     sourceProvider?: string | null;
     sourceUrl?: string | null;
@@ -17,7 +19,10 @@ const MediaAttribution = ({
     variant = 'overlay',
     className = '',
 }: MediaAttributionProps) => {
-    if (sourceProvider !== 'PEXELS' || !sourceAuthor || !sourceUrl) {
+    const safeSourceUrl = getSafePexelsUrl(sourceUrl);
+    const safeSourceAuthorUrl = getSafePexelsUrl(sourceAuthorUrl);
+
+    if (sourceProvider !== 'PEXELS' || !sourceAuthor || !safeSourceUrl) {
         return null;
     }
 
@@ -31,9 +36,9 @@ const MediaAttribution = ({
     return (
         <div className={`${layoutClass} font-medium text-white ${className}`}>
             <span>Photo by </span>
-            {sourceAuthorUrl ? (
+            {safeSourceAuthorUrl ? (
                 <a
-                    href={sourceAuthorUrl}
+                    href={safeSourceAuthorUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline underline-offset-2 hover:text-white"
@@ -46,7 +51,7 @@ const MediaAttribution = ({
             )}
             <span> on </span>
             <a
-                href={sourceUrl}
+                href={safeSourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline underline-offset-2 hover:text-white"

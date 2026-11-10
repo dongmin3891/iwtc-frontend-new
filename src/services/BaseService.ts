@@ -7,13 +7,13 @@ import axios, {
     RawAxiosRequestHeaders,
 } from 'axios';
 import { localStorageClear } from '@/stores/LocalStore';
-import { removeToken, setToken } from '@/utils/TokenManager';
+import { getAccessToken, removeToken, setToken } from '@/utils/TokenManager';
 import { hasRetryableUnauthorizedRequest } from './axiosError';
 
 interface ApiEnvelope<T> {
     code: number;
     message: string;
-    data: T;
+    data: T | null;
 }
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
@@ -32,14 +32,21 @@ const instance = axios.create({
     withCredentials: true,
 });
 
-const requestNewAccessToken = (): Promise<string> => {
+export const refreshAccessToken = (): Promise<string> => {
     if (!refreshPromise) {
         refreshPromise = axios
             .post<ApiEnvelope<{ newAccessToken: string }>>(`${MEMBER_URL}api/new-access-token`, undefined, {
                 timeout: 5000,
                 withCredentials: true,
             })
-            .then((response) => response.data.data.newAccessToken)
+            .then((response) => {
+                const newAccessToken = response.data.data?.newAccessToken;
+                if (!newAccessToken) {
+                    throw new Error('Access token refresh failed');
+                }
+                setToken(newAccessToken);
+                return newAccessToken;
+            })
             .finally(() => {
                 refreshPromise = null;
             });
@@ -64,6 +71,10 @@ const isPublicAuthRequest = (url?: string) =>
 
 instance.interceptors.request.use(
     (config) => {
+        const accessToken = getAccessToken();
+        if (accessToken && !config.headers['access-token']) {
+            config.headers['access-token'] = accessToken;
+        }
         if (config.url?.includes('member')) {
             // 'member'가 포함된 경우 MEMBER_BASE_URL 사용
             config.baseURL = `${MEMBER_URL}api/`;
@@ -100,8 +111,7 @@ instance.interceptors.response.use(
 
             config._retry = true;
             try {
-                const newAccessToken = await requestNewAccessToken();
-                setToken(newAccessToken);
+                const newAccessToken = await refreshAccessToken();
                 config.headers['access-token'] = newAccessToken;
                 return instance.request(config);
             } catch {

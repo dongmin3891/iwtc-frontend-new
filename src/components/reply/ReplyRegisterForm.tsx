@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { ChangeEvent, FormEvent, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { getUserInfo } from '@/stores/LocalStore';
-import * as shortid from 'shortid';
 import { replyQueryKeys } from '@/lib/react-query/queryKeys';
 import { getAccessToken } from '@/utils/TokenManager';
 
@@ -35,7 +34,7 @@ const ReplyRegisterForm = ({ worldcupId, contentsId }: IProps) => {
             worldcupId,
             contentsId,
             body: normalizedText,
-            nickname: isLoggedIn ? getUserInfo().nickname : shortid.generate(),
+            nickname: isLoggedIn ? getUserInfo().nickname : crypto.randomUUID().slice(0, 8),
             token: isLoggedIn ? getAccessToken() : undefined,
         });
     };

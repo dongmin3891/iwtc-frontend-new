@@ -14,4 +14,9 @@ describe('getYoutubeVideoId', () => {
     it('returns undefined for an invalid URL', () => {
         assert.equal(getYoutubeVideoId('not-a-url'), undefined);
     });
+
+    it('rejects insecure and lookalike YouTube URLs', () => {
+        assert.equal(getYoutubeVideoId('http://www.youtube.com/watch?v=video-id'), undefined);
+        assert.equal(getYoutubeVideoId('https://youtube.com.attacker.example/watch?v=video-id'), undefined);
+    });
 });

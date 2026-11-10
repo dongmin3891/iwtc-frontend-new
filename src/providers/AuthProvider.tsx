@@ -1,7 +1,7 @@
 'use client';
 
 import type { userInfo as UserInfo } from '@/interfaces/models/login/MemberData';
-import { getUserInfo, localStorageClear, setUserInfo } from '@/stores/LocalStore';
+import { localStorageClear, setUserInfo } from '@/stores/LocalStore';
 import { getAccessToken, removeToken } from '@/utils/TokenManager';
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react';
 
@@ -25,14 +25,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     useEffect(() => {
         const loginCheck = async () => {
-            const accessToken = getAccessToken();
-            if (!accessToken) {
-                setIsLoggedIn(false);
-                setUser(null);
-                return;
-            }
-
             try {
+                const { refreshAccessToken } = await import('@/services/BaseService');
+                const accessToken = getAccessToken() || (await refreshAccessToken());
                 const { userMeSummary } = await import('@/services/MemberService');
                 const response = await userMeSummary(accessToken);
                 setUserInfo(response.data);
@@ -46,11 +41,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             }
         };
 
-        if (getAccessToken() && getUserInfo()) {
-            void loginCheck();
-        } else {
-            setIsLoggedIn(false);
-        }
+        void loginCheck();
     }, []);
 
     const login = (authenticatedUser: UserInfo) => {

@@ -7,7 +7,6 @@ const config: Config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/tw-elements-react/dist/js/**/*.js",
   ],
   theme: {
     extend: {
@@ -18,7 +17,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tw-elements-react/dist/plugin.cjs")],
+  plugins: [],
   darkMode: "class",
 }
 export default config;

@@ -127,8 +127,9 @@ CLOUDFLARE_ZONE_ID=...
 
 ## 인증 동작
 
-- 로그인 성공 시 access token은 기존 API 호환을 위해 브라우저의 `ACCESS_TOKEN` 쿠키에 저장하고 `access-token` 요청 헤더로 전송합니다.
+- 로그인 성공 시 access token은 메모리에만 저장하고 `access-token` 요청 헤더로 전송합니다.
 - refresh token은 백엔드가 설정하는 HttpOnly 쿠키이므로 프론트엔드 JavaScript에서 읽거나 저장하지 않습니다.
+- 페이지를 새로 열면 refresh 쿠키로 access token을 재발급한 뒤 로그인 상태를 복구합니다.
 - access token 만료 시 refresh 요청을 한 번만 실행하고 실패했던 요청을 재시도합니다.
 - 로그인과 회원가입의 401 응답은 자동 갱신 대상으로 처리하지 않습니다.
 - 로그아웃 후 access token과 로컬 회원 정보를 정리합니다.

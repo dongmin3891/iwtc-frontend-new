@@ -1,20 +1,25 @@
 'use client';
-import { Cookies } from 'react-cookie';
 
-const cookies = new Cookies();
+const ACCESS_TOKEN_KEY = 'ACCESS_TOKEN';
+let accessToken = '';
+
+const clearLegacyBrowserStorage = () => {
+    if (typeof document !== 'undefined') {
+        document.cookie = `${ACCESS_TOKEN_KEY}=; Max-Age=0; Path=/; SameSite=Lax`;
+    }
+    if (typeof window !== 'undefined') {
+        window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    }
+};
 
 export const setToken = (token: string) => {
-    cookies.set('ACCESS_TOKEN', token, {
-        path: '/',
-        sameSite: 'lax',
-        secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
-    });
+    accessToken = token;
+    clearLegacyBrowserStorage();
 };
 
 export const removeToken = () => {
-    cookies.remove('ACCESS_TOKEN', { path: '/' });
+    accessToken = '';
+    clearLegacyBrowserStorage();
 };
 
-export const getAccessToken = () => {
-    return cookies.get('ACCESS_TOKEN');
-};
+export const getAccessToken = (): string => accessToken;
