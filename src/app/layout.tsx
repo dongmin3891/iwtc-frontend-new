@@ -1,6 +1,7 @@
 import '../styles/globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import QueryProvider from '@/providers/QueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import Header from '@/components/common/Header';
@@ -48,6 +49,11 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
                         </AuthProvider>
                     </QueryProvider>
                 </body>
+                <Script
+                    type="module"
+                    src="https://static.cloudflareinsights.com/beacon.min.js"
+                    data-cf-beacon='{"token":"a38a5d4a2e3e48b2996cc18b80b500cb"}'
+                />
             </html>
         </>
     );
